@@ -1,0 +1,14 @@
+[package]
+name = "nya-bot"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+chat_message = { version = "0.1.0", path = "plugins/chat_message" }
+kovi = "0.11.10"
+
+[workspace]
+members = ["plugins/chat_message"]
+
+[workspace.dependencies]
+kovi = "0.11.10"

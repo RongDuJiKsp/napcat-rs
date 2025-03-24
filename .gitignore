@@ -1,0 +1,5 @@
+/target
+kovi.conf.toml
+/.idea
+/.vscode
+/data
