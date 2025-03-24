@@ -20,7 +20,6 @@ impl ChatConfigContext {
         let default_config: ChatConfig = ChatConfig {
             allow_groups: vec![]
         };
-        println!("{:?}", runtime_bot.get_data_path().join("chat_config.json"));
         let config = load_json_data(default_config, runtime_bot.get_data_path().join("chat_config.json"))?;
         CHAT_CONFIG.set(ChatConfigContext::from_config(&config)).map_err(|_e| anyhow!("初始化ChatConfigContext时出现重复设置"))?;
         Ok(())
