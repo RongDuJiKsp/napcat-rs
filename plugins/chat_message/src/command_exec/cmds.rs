@@ -43,7 +43,7 @@ async fn exec_live(e: BotCommand) {
 }
 async fn exec_smart(e: BotCommand) {
     if let Some(q) = e.args.get(0) {
-        e.event.reply_and_quote(ml::get_reply_as_smart_nya_cat(q).await.unwrap_or_else(|e| e.to_string()))
+        e.event.reply_and_quote(ml::get_reply_as_smart_nya_cat(q).await.unwrap_or_else(|e| format!("发生错误了喵：{}", e)))
     } else {
         e.event.reply_and_quote("聪明猫娘在这里喵！");
     }
