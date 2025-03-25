@@ -1,5 +1,6 @@
 use crate::command_exec::app::{BotCommand, BotCommandBuilder};
-use crate::handlers::group_chat::{NyaCatMemory, LIVE};
+use crate::config::SyncControl;
+use crate::handlers::group_chat::NyaCatMemory;
 use crate::ml;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -13,7 +14,7 @@ pub async fn register_shell_cmd() {
 }
 static ID: AtomicUsize = AtomicUsize::new(1156);
 async fn exec_shell_cmd(e: BotCommand) {
-    if !LIVE.load(Ordering::Relaxed) {
+    if !SyncControl::running() {
         return;
     }
     e.event.reply_and_quote(format!(
@@ -22,28 +23,28 @@ async fn exec_shell_cmd(e: BotCommand) {
     ))
 }
 async fn exec_hi(e: BotCommand) {
-    if !LIVE.load(Ordering::Relaxed) {
+    if !SyncControl::running() {
         return;
     }
     e.event
         .reply_and_quote("你好喵！我是一只猫娘喵！前面忘了中间忘了，反正我是一只猫娘喵")
 }
 async fn exec_kill(e: BotCommand) {
-    if !LIVE.load(Ordering::Relaxed) {
+    if !SyncControl::running() {
         return;
     }
     e.event.reply_and_quote("猫娘似了喵");
-    LIVE.store(false, Ordering::Relaxed)
+    SyncControl::set_bot_run(false);
 }
 async fn exec_live(e: BotCommand) {
-    if LIVE.load(Ordering::Relaxed) {
+    if SyncControl::running() {
         return;
     }
     e.event.reply_and_quote("猫娘复活了喵");
-    LIVE.store(true, Ordering::Relaxed)
+    SyncControl::set_bot_run(true);
 }
 async fn exec_smart(e: BotCommand) {
-    if !LIVE.load(Ordering::Relaxed) {
+    if !SyncControl::running() {
         return;
     }
     if let Some(q) = e.args.get(0) {

@@ -1,5 +1,5 @@
 use crate::command_exec::app::BotCommand;
-use crate::config::ChatConfigContext;
+use crate::config::{ChatConfigContext, SyncControl};
 use crate::{ml, tools};
 use anyhow::anyhow;
 use async_openai::types::{
@@ -10,10 +10,8 @@ use kovi::tokio::sync::RwLock;
 use kovi::{MsgEvent, RuntimeBot};
 use std::collections::{HashMap, VecDeque};
 use std::error::Error;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::time::SystemTime;
-pub static LIVE: AtomicBool = AtomicBool::new(true);
 pub async fn handle_group_chat(
     bot: Arc<RuntimeBot>,
     event: Arc<MsgEvent>,
@@ -74,7 +72,7 @@ pub async fn handle_group_chat(
 }
 async fn call_me_msg(_e: Arc<MsgEvent>) {}
 async fn method_me(e: Arc<MsgEvent>) {
-    if !LIVE.load(Ordering::Relaxed) {
+    if !SyncControl::running() {
         return;
     }
     e.reply("是不是有人叫我喵");
@@ -150,7 +148,7 @@ async fn at_me(e: Arc<MsgEvent>) {
     }
 
     //否则当成问话
-    if !LIVE.load(Ordering::Relaxed) {
+    if !!SyncControl::running() {
         //如果关闭了则不响应问话
         return;
     }

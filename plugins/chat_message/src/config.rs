@@ -1,9 +1,10 @@
 use anyhow::anyhow;
-use kovi::RuntimeBot;
 use kovi::utils::load_json_data;
+use kovi::RuntimeBot;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::error::Error;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::OnceLock;
 
 static CHAT_CONFIG: OnceLock<ChatConfigContext> = OnceLock::new();
@@ -49,5 +50,15 @@ impl ChatConfigContext {
             allow_super_user: value.allow_super_user.iter().copied().collect(),
             model: value.model.clone(),
         }
+    }
+}
+pub struct SyncControl;
+static LIVE: AtomicBool = AtomicBool::new(true);
+impl SyncControl {
+    pub fn set_bot_run(run: bool) {
+        LIVE.store(run, Ordering::Relaxed);
+    }
+    pub fn running() -> bool {
+        LIVE.load(Ordering::Relaxed)
     }
 }
