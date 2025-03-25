@@ -1,49 +1,48 @@
-use kovi::tokio::sync::broadcast;
+use kovi::log::error;
+use kovi::tokio::sync::{broadcast, RwLock};
 use kovi::MsgEvent;
-use std::cell::RefCell;
 use std::collections::HashSet;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
-
-struct BotCommandBuilder {
+#[derive(Debug)]
+pub struct BotCommandBuilder {
     event_bus: broadcast::Sender<BotCommand>,
-    super_command: RefCell<HashSet<&'static str>>,
-    common_command: RefCell<HashSet<&'static str>>,
+    super_command: HashSet<&'static str>,
+    common_command: HashSet<&'static str>,
 }
-kovi::tokio::task_local! {
-    static COMMAND_BUILDER:BotCommandBuilder;
-}
+static COMMAND_BUILDER: OnceLock<RwLock<BotCommandBuilder>> = OnceLock::new();
 impl BotCommandBuilder {
     pub async fn init_event_bus() {
         let (tx, _) = broadcast::channel(100);
         let b = BotCommandBuilder {
             event_bus: tx,
-            super_command: RefCell::new(HashSet::new()),
-            common_command: RefCell::new(HashSet::new()),
+            super_command: HashSet::new(),
+            common_command: HashSet::new(),
         };
-        COMMAND_BUILDER.scope(b, async {}).await;
+        COMMAND_BUILDER.set(RwLock::new(b)).expect("No Twice Init");
     }
-    pub fn on_common_command<F, Fut>(cmd: &'static str, hd: F)
+    fn instance_lock() -> &'static RwLock<BotCommandBuilder> {
+        COMMAND_BUILDER.get().expect("NoInit")
+    }
+    pub async fn on_common_command<F, Fut>(cmd: &'static str, hd: F)
     where
         F: Fn(BotCommand) -> Fut + Send + Sync + 'static,
         Fut: Future + Send,
         Fut::Output: Send,
     {
-        COMMAND_BUILDER.with(|f| {
-            f.common_command.borrow_mut().insert(cmd);
-            f.subscribe(cmd, hd);
-        })
+        let mut f = BotCommandBuilder::instance_lock().write().await;
+        f.subscribe(cmd, hd);
+        f.common_command.insert(cmd);
     }
-    pub fn on_super_command<F, Fut>(cmd: &'static str, hd: F)
+    pub async fn on_super_command<F, Fut>(cmd: &'static str, hd: F)
     where
         F: Fn(BotCommand) -> Fut + Send + Sync + 'static,
         Fut: Future + Send,
         Fut::Output: Send,
     {
-        COMMAND_BUILDER.with(|f| {
-            f.super_command.borrow_mut().insert(cmd);
-            f.subscribe(cmd, hd);
-        })
+        let mut f = BotCommandBuilder::instance_lock().write().await;
+        f.subscribe(cmd, hd);
+        f.super_command.insert(cmd);
     }
     fn subscribe<F, Fut>(&self, cmd: &'static str, hd: F)
     where
@@ -64,9 +63,9 @@ impl BotCommandBuilder {
 }
 #[derive(Debug, Clone)]
 pub struct BotCommand {
-    cmd: Arc<String>,
-    args: Arc<Vec<String>>,
-    event: Arc<MsgEvent>,
+    pub cmd: Arc<String>,
+    pub args: Arc<Vec<String>>,
+    pub event: Arc<MsgEvent>,
 }
 impl BotCommand {
     pub fn from_str(s: &str, e: Arc<MsgEvent>) -> BotCommand {
@@ -77,7 +76,23 @@ impl BotCommand {
             args: Arc::new(args.map(|x| x.to_string()).collect()),
         }
     }
-    pub fn invoke_command(&self) {}
-    fn exec_common_command(&self) {}
-    fn exec_super_command(&self) {}
+    pub async fn invoke_command(&self) {
+        let f = BotCommandBuilder::instance_lock().read().await;
+        if f.super_command.contains(self.cmd.as_str()) {
+            if self.event.sender.role.as_ref().and_then(|r| if r == "admin" { Some(()) } else { None }).is_some() {
+                self.exec_command(&f.event_bus).await;
+            } else {
+                self.event.reply_and_quote("你是谁喵！我不认识你喵！哒咩！");
+            }
+        } else if f.common_command.contains(self.cmd.as_str()) {
+            self.exec_command(&f.event_bus).await;
+        } else {
+            self.event.reply_and_quote("不认识的命令喵！每日疑惑1/1")
+        }
+    }
+    async fn exec_command(&self, sender: &broadcast::Sender<BotCommand>) {
+        if let Err(_) = sender.send(self.clone()) {
+            error!("分发命令失败!")
+        }
+    }
 }
