@@ -1,6 +1,6 @@
 use crate::command_exec::app::BotCommand;
 use crate::config::ChatConfigContext;
-use crate::tools;
+use crate::{ml, tools};
 use anyhow::anyhow;
 use kovi::{MsgEvent, RuntimeBot};
 use std::error::Error;
@@ -69,6 +69,7 @@ async fn method_me(e: Arc<MsgEvent>) {
     e.reply("是不是有人叫我喵");
 }
 async fn at_me(e: Arc<MsgEvent>) {
+    //如果是指令则处理指令
     if let Some(cmd) = e
         .text
         .as_ref()
@@ -77,5 +78,17 @@ async fn at_me(e: Arc<MsgEvent>) {
         BotCommand::from_str(cmd, e.clone()).invoke_command().await;
         return;
     }
-    e.reply("叫我什么事喵")
+    //否则当成问话
+    if let Some(question) = e
+        .text
+        .as_ref()
+        .and_then(|s| if s.len() > 0 { Some(s) } else { None })
+    {
+        match ml::get_reply_as_nya_cat(question).await {
+            Ok(r) => e.reply_and_quote(r),
+            Err(err) => e.reply_and_quote(format!("发生错误了喵！！{}", err.to_string())),
+        }
+    } else {
+        e.reply_and_quote("叫我什么事喵？");
+    }
 }

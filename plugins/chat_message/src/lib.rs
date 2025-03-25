@@ -1,6 +1,7 @@
 mod command_exec;
 mod config;
 mod handlers;
+mod ml;
 mod tools;
 
 use crate::command_exec::app::BotCommandBuilder;
@@ -21,7 +22,7 @@ async fn app() {
         .expect("error on load ChatConfigContext");
     BotCommandBuilder::init_event_bus().await;
     register_shell_cmd().await;
-    plugin::on_group_msg({ move |event| on_group_msg(bot.clone(), event) })
+    plugin::on_group_msg( move |event| on_group_msg(bot.clone(), event) )
 }
 async fn on_group_msg(bot: Arc<RuntimeBot>, event: Arc<MsgEvent>) {
     if let Err(error) = handlers::group_chat::handle_group_chat(bot, event).await {
