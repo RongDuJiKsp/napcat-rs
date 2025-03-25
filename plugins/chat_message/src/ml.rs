@@ -1,10 +1,10 @@
 use crate::config::ChatConfigContext;
 use anyhow::anyhow;
+use async_openai::Client;
 use async_openai::config::OpenAIConfig;
 use async_openai::types::{
     ChatCompletionRequestMessage, ChatCompletionRequestUserMessage, CreateChatCompletionRequestArgs,
 };
-use async_openai::Client;
 use kovi::log::warn;
 use std::error::Error;
 
@@ -16,7 +16,10 @@ async fn build_client() -> Client<OpenAIConfig> {
             .with_api_key(&cfg.key),
     )
 }
-async fn completion_chat(msg: Vec<ChatCompletionRequestMessage>, model: &str) -> Result<String, Box<dyn Error>> {
+async fn completion_chat(
+    msg: Vec<ChatCompletionRequestMessage>,
+    model: &str,
+) -> Result<String, Box<dyn Error>> {
     let c = build_client().await;
     let res = c
         .chat()
@@ -28,7 +31,10 @@ async fn completion_chat(msg: Vec<ChatCompletionRequestMessage>, model: &str) ->
                 .build()?,
         )
         .await?;
-    res.choices.first().and_then(|c| c.finish_reason).and_then(|s| Some(warn!("model finished with {}",s)));
+    res.choices
+        .first()
+        .and_then(|c| c.finish_reason)
+        .and_then(|s| Some(warn!("model finished with {}", s)));
     Ok(res
         .choices
         .first()
@@ -36,12 +42,17 @@ async fn completion_chat(msg: Vec<ChatCompletionRequestMessage>, model: &str) ->
         .ok_or(anyhow!("Models No Response"))?)
 }
 async fn single_chat(s: &str, model: &str) -> Result<String, Box<dyn Error>> {
-    completion_chat(vec![ChatCompletionRequestMessage::User(
-        ChatCompletionRequestUserMessage::from(s),
-    )], model)
+    completion_chat(
+        vec![ChatCompletionRequestMessage::User(
+            ChatCompletionRequestUserMessage::from(s),
+        )],
+        model,
+    )
 }
 
-pub async fn get_reply_as_nya_cat(chat_msg: Vec<ChatCompletionRequestMessage>) -> Result<String, Box<dyn Error>> {
+pub async fn get_reply_as_nya_cat(
+    chat_msg: Vec<ChatCompletionRequestMessage>,
+) -> Result<String, Box<dyn Error>> {
     completion_chat(chat_msg, &ChatConfigContext::get().model.role_model).await
 }
 pub async fn get_reply_as_smart_nya_cat(q: &str) -> Result<String, Box<dyn Error>> {
@@ -52,5 +63,9 @@ pub async fn get_reply_as_smart_nya_cat(q: &str) -> Result<String, Box<dyn Error
 - “你会做什么？” → “本喵会卖萌、撒娇，还会陪主人聊天喵~”
 请用猫娘的方式回答接下来的问题：
 ";
-    single_chat(&format!("{prompt}\n{q}"), &ChatConfigContext::get().model.smart_model).await
+    single_chat(
+        &format!("{prompt}\n{q}"),
+        &ChatConfigContext::get().model.smart_model,
+    )
+    .await
 }
