@@ -1,6 +1,7 @@
 mod handlers;
 mod config;
 mod tools;
+mod command_exec;
 
 use crate::config::ChatConfigContext;
 use kovi::log::error;
@@ -19,7 +20,7 @@ async fn app() {
     })
 }
 async fn on_group_msg(bot: Arc<RuntimeBot>, event: Arc<MsgEvent>) {
-    if let Err(error) = handlers::group_chat::handle_group_chat(&bot, event).await {
+    if let Err(error) = handlers::group_chat::handle_group_chat(bot, event).await {
         error!("{error}")
     }
 }

@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 chat_message = { version = "0.1.0", path = "plugins/chat_message" }
 kovi = "0.11.10"
+kovi-plugin-check-alllong = { git = "https://github.com/kovi-plugins/check-all-long.git", version = "0.1.0" }
 
 [workspace]
 members = ["plugins/chat_message"]

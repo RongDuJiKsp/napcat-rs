@@ -1,0 +1,1 @@
+pub const CMD_NAME: &str = "shell";
