@@ -10,15 +10,18 @@ static CHAT_CONFIG: OnceLock<ChatConfigContext> = OnceLock::new();
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ChatConfig {
     allow_groups: Vec<i64>,
+    allow_super_user: Vec<i64>,
 }
 #[derive(Debug)]
 pub struct ChatConfigContext {
     pub allow_groups: HashSet<i64>,
+    pub allow_super_user: HashSet<i64>,
 }
 impl ChatConfigContext {
     pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), Box<dyn Error>> {
         let default_config: ChatConfig = ChatConfig {
             allow_groups: vec![],
+            allow_super_user: vec![],
         };
         let config = load_json_data(
             default_config,
@@ -35,6 +38,7 @@ impl ChatConfigContext {
     pub fn from_config(value: &ChatConfig) -> ChatConfigContext {
         ChatConfigContext {
             allow_groups: value.allow_groups.iter().copied().collect(),
+            allow_super_user: value.allow_super_user.iter().copied().collect(),
         }
     }
 }

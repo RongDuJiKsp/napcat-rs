@@ -1,3 +1,4 @@
+use crate::config::{ChatConfig, ChatConfigContext};
 use kovi::MsgEvent;
 use kovi::log::{error, info, log};
 use kovi::tokio::sync::{RwLock, broadcast};
@@ -86,13 +87,9 @@ impl BotCommand {
     pub async fn invoke_command(&self) {
         let f = BotCommandBuilder::instance_lock().read().await;
         if f.super_command.contains(self.cmd.as_str()) {
-            if self
-                .event
-                .sender
-                .role
-                .as_ref()
-                .and_then(|r| if r == "admin" { Some(()) } else { None })
-                .is_some()
+            if ChatConfigContext::get()
+                .allow_super_user
+                .contains(&self.event.sender.user_id)
             {
                 self.exec_command(&f.event_bus).await;
             } else {
