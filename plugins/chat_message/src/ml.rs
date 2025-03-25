@@ -34,7 +34,7 @@ async fn completion_chat(
     res.choices
         .first()
         .and_then(|c| c.finish_reason)
-        .and_then(|s| Some(warn!("model finished with {}", s)));
+        .and_then(|s| Some(warn!("model finished with {:?}", s)));
     Ok(res
         .choices
         .first()
@@ -48,6 +48,7 @@ async fn single_chat(s: &str, model: &str) -> Result<String, Box<dyn Error>> {
         )],
         model,
     )
+    .await
 }
 
 pub async fn get_reply_as_nya_cat(
