@@ -32,7 +32,7 @@ async fn exec_kill(e: BotCommand) {
     if !LIVE.load(Ordering::Relaxed) {
         return;
     }
-    e.event.reply_and_quote("似了喵");
+    e.event.reply_and_quote("猫娘似了喵");
     LIVE.store(false, Ordering::Relaxed)
 }
 async fn exec_live(e: BotCommand) {
@@ -43,6 +43,9 @@ async fn exec_live(e: BotCommand) {
     LIVE.store(true, Ordering::Relaxed)
 }
 async fn exec_smart(e: BotCommand) {
+    if !LIVE.load(Ordering::Relaxed) {
+        return;
+    }
     if let Some(q) = e.args.get(0) {
         e.event.reply_and_quote(
             ml::get_reply_as_smart_nya_cat(q)
