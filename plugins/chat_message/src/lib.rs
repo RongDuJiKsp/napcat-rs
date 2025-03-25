@@ -5,7 +5,7 @@ mod ml;
 mod tools;
 
 use crate::command_exec::app::BotCommandBuilder;
-use crate::command_exec::shell::register_shell_cmd;
+use crate::command_exec::cmds::register_shell_cmd;
 use crate::config::ChatConfigContext;
 use kovi::log::error;
 use kovi::{MsgEvent, PluginBuilder as plugin, RuntimeBot};

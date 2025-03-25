@@ -1,6 +1,6 @@
 use anyhow::anyhow;
-use kovi::RuntimeBot;
 use kovi::utils::load_json_data;
+use kovi::RuntimeBot;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::error::Error;
@@ -11,7 +11,11 @@ static CHAT_CONFIG: OnceLock<ChatConfigContext> = OnceLock::new();
 pub struct ChatModelCallConfig {
     pub key: String,
     pub endpoint: String,
-    pub model: String,
+    pub max_tokens:u16,
+    pub role_model: String,
+    pub role_context_expiration_time_second: u64,
+    pub role_max_message: usize,
+    pub smart_model: String,
 }
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct ChatConfig {
