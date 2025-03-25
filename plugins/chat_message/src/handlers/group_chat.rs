@@ -64,7 +64,7 @@ pub async fn handle_group_chat(
 
     Ok(())
 }
-async fn call_me_msg(e: Arc<MsgEvent>) {}
+async fn call_me_msg(_e: Arc<MsgEvent>) {}
 async fn method_me(e: Arc<MsgEvent>) {
     e.reply("是不是有人叫我喵");
 }
