@@ -41,7 +41,7 @@ async fn method_me(e: Arc<MsgEvent>) {
 }
 async fn at_me(e: Arc<MsgEvent>) {
     if let Some(cmd) = e.text.as_ref().and_then(|e| if e.starts_with("$") { Some(e) } else { None }) {
-        BotCommand::from_str(cmd, e.clone()).invoke_command();
+        BotCommand::from_str(cmd, e.clone()).invoke_command().await;
         return;
     }
     e.reply("叫我什么事喵")

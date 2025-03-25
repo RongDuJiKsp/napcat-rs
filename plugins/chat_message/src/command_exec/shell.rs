@@ -4,7 +4,7 @@ use kovi::log::info;
 
 pub async fn register_shell_cmd() {
     BotCommandBuilder::on_super_command("$shell", |e| exec_shell_cmd(e)).await;
-    BotCommandBuilder::on_common_command("hi", |e| exec_hi(e)).await;
+    BotCommandBuilder::on_common_command("$hi", |e| exec_hi(e)).await;
 }
 static ID: AtomicUsize = AtomicUsize::new(1156);
 async fn exec_shell_cmd(e: BotCommand) {

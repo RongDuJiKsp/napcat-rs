@@ -1,4 +1,4 @@
-use kovi::log::error;
+use kovi::log::{error, info, log};
 use kovi::tokio::sync::{broadcast, RwLock};
 use kovi::MsgEvent;
 use std::collections::HashSet;
@@ -33,6 +33,7 @@ impl BotCommandBuilder {
         let mut f = BotCommandBuilder::instance_lock().write().await;
         f.subscribe(cmd, hd);
         f.common_command.insert(cmd);
+        info!("Common 命令 {} 注册成功",cmd)
     }
     pub async fn on_super_command<F, Fut>(cmd: &'static str, hd: F)
     where
@@ -43,6 +44,7 @@ impl BotCommandBuilder {
         let mut f = BotCommandBuilder::instance_lock().write().await;
         f.subscribe(cmd, hd);
         f.super_command.insert(cmd);
+        info!("Super 命令 {} 注册成功",cmd)
     }
     fn subscribe<F, Fut>(&self, cmd: &'static str, hd: F)
     where
@@ -53,9 +55,11 @@ impl BotCommandBuilder {
         let mut rec = self.event_bus.subscribe();
         kovi::spawn(async move {
             while let Ok(event) = rec.recv().await {
-                if (*event.cmd) != cmd {
+                info!("命令执行器{}收到命令{}",event.cmd.as_str(),cmd);
+                if event.cmd.as_str() != cmd {
                     continue;
                 }
+                info!("命令执行器{}执行命令{}",event.cmd.as_str(),cmd);
                 hd(event).await;
             }
         });

@@ -3,6 +3,8 @@ mod config;
 mod tools;
 mod command_exec;
 
+use crate::command_exec::app::BotCommandBuilder;
+use crate::command_exec::shell::register_shell_cmd;
 use crate::config::ChatConfigContext;
 use kovi::log::error;
 use kovi::{MsgEvent, PluginBuilder as plugin, RuntimeBot};
@@ -15,6 +17,8 @@ async fn main() {
 async fn app() {
     let bot = plugin::get_runtime_bot();
     ChatConfigContext::init(&bot).await.expect("error on load ChatConfigContext");
+    BotCommandBuilder::init_event_bus().await;
+    register_shell_cmd().await;
     plugin::on_group_msg({
         move |event| on_group_msg(bot.clone(), event)
     })
