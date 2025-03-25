@@ -7,9 +7,9 @@ pub async fn register_shell_cmd() {
     BotCommandBuilder::on_super_command("$shell", |e| exec_shell_cmd(e)).await;
     BotCommandBuilder::on_common_command("$smart", |e| exec_smart(e)).await;
     BotCommandBuilder::on_common_command("$hi", |e| exec_hi(e)).await;
-    BotCommandBuilder::on_common_command("$restart", |e| exec_live(e)).await;
-    BotCommandBuilder::on_common_command("$kill", |e| exec_kill(e)).await;
-    BotCommandBuilder::on_common_command("$mem_kill", |e| exec_mem_kill(e)).await;
+    BotCommandBuilder::on_super_command("$restart", |e| exec_live(e)).await;
+    BotCommandBuilder::on_super_command("$kill", |e| exec_kill(e)).await;
+    BotCommandBuilder::on_super_command("$mem_kill", |e| exec_mem_kill(e)).await;
 }
 static ID: AtomicUsize = AtomicUsize::new(1156);
 async fn exec_shell_cmd(e: BotCommand) {
@@ -39,7 +39,7 @@ async fn exec_live(e: BotCommand) {
     if LIVE.load(Ordering::Relaxed) {
         return;
     }
-    e.event.reply_and_quote("复活了喵");
+    e.event.reply_and_quote("猫娘复活了喵");
     LIVE.store(true, Ordering::Relaxed)
 }
 async fn exec_smart(e: BotCommand) {
