@@ -6,12 +6,14 @@ use async_openai::types::{
     ChatCompletionRequestAssistantMessage, ChatCompletionRequestMessage,
     ChatCompletionRequestSystemMessage, ChatCompletionRequestUserMessage,
 };
+use kovi::log::info;
 use kovi::tokio::sync::RwLock;
 use kovi::{MsgEvent, RuntimeBot};
 use std::collections::{HashMap, VecDeque};
 use std::error::Error;
 use std::sync::{Arc, OnceLock};
 use std::time::SystemTime;
+
 pub async fn handle_group_chat(
     bot: Arc<RuntimeBot>,
     event: Arc<MsgEvent>,
@@ -99,6 +101,7 @@ impl NyaCatMemory {
         self.user_memory.clear();
     }
     fn load_mem(&mut self, user_id: i64, new_msg: &str) -> Vec<ChatCompletionRequestMessage> {
+        info!("用户{user_id}发出提问:{new_msg}");
         let now_time = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .expect("System Time Error!!!!!!")
@@ -124,6 +127,7 @@ impl NyaCatMemory {
         v
     }
     fn save_mem(&mut self, user_id: i64, new_chat_msg: &str) {
+        info!("模型对用户{user_id}回答:{new_chat_msg}");
         let now_time = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .expect("System Time Error!!!!!!")
@@ -148,7 +152,7 @@ async fn at_me(e: Arc<MsgEvent>) {
     }
 
     //否则当成问话
-    if !!SyncControl::running() {
+    if !SyncControl::running() {
         //如果关闭了则不响应问话
         return;
     }
