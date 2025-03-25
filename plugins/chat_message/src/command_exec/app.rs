@@ -55,11 +55,10 @@ impl BotCommandBuilder {
         let mut rec = self.event_bus.subscribe();
         kovi::spawn(async move {
             while let Ok(event) = rec.recv().await {
-                info!("命令执行器{}收到命令{}",event.cmd.as_str(),cmd);
                 if event.cmd.as_str() != cmd {
                     continue;
                 }
-                info!("命令执行器{}执行命令{}",event.cmd.as_str(),cmd);
+                info!("命令执行器 {} 执行命令使用参数{:?}",event.cmd.as_str(),&*event.args);
                 hd(event).await;
             }
         });
