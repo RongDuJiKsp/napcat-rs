@@ -22,6 +22,20 @@ pub struct MemberInfo {
     pub title_expire_time: i32,
     pub card_changeable: bool,
 }
-pub async fn self_bot_info(bot: &RuntimeBot, event: &MsgEvent) -> Result<MemberInfo, Box<dyn Error>> {
-    Ok(serde_json::from_value(bot.get_group_member_info(event.group_id.ok_or(anyhow::anyhow!("bot_info not found"))?, event.self_id, false).await.map_err(|e| anyhow!("{}",e.data.to_string()))?.data)?)
+pub async fn self_bot_info(
+    bot: &RuntimeBot,
+    event: &MsgEvent,
+) -> Result<MemberInfo, Box<dyn Error>> {
+    Ok(serde_json::from_value(
+        bot.get_group_member_info(
+            event
+                .group_id
+                .ok_or(anyhow::anyhow!("bot_info not found"))?,
+            event.self_id,
+            false,
+        )
+        .await
+        .map_err(|e| anyhow!("{}", e.data.to_string()))?
+        .data,
+    )?)
 }

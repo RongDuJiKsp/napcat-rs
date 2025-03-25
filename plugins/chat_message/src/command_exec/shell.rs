@@ -13,13 +13,17 @@ async fn exec_shell_cmd(e: BotCommand) {
     if !LIVE.load(Ordering::Relaxed) {
         return;
     }
-    e.event.reply_and_quote(format!("shell创建成功喵！编号 {}", ID.fetch_add(1, Ordering::Relaxed)))
+    e.event.reply_and_quote(format!(
+        "shell创建成功喵！编号 {}",
+        ID.fetch_add(1, Ordering::Relaxed)
+    ))
 }
 async fn exec_hi(e: BotCommand) {
     if !LIVE.load(Ordering::Relaxed) {
         return;
     }
-    e.event.reply_and_quote("你好喵！我是一只猫娘喵！前面忘了中间忘了，反正我是一只猫娘喵")
+    e.event
+        .reply_and_quote("你好喵！我是一只猫娘喵！前面忘了中间忘了，反正我是一只猫娘喵")
 }
 async fn exec_kill(e: BotCommand) {
     if !LIVE.load(Ordering::Relaxed) {

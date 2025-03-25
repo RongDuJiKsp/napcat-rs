@@ -1,6 +1,6 @@
-use kovi::log::{error, info, log};
-use kovi::tokio::sync::{broadcast, RwLock};
 use kovi::MsgEvent;
+use kovi::log::{error, info, log};
+use kovi::tokio::sync::{RwLock, broadcast};
 use std::collections::HashSet;
 use std::sync::{Arc, OnceLock};
 
@@ -33,7 +33,7 @@ impl BotCommandBuilder {
         let mut f = BotCommandBuilder::instance_lock().write().await;
         f.subscribe(cmd, hd);
         f.common_command.insert(cmd);
-        info!("Common 命令 {} 注册成功",cmd)
+        info!("Common 命令 {} 注册成功", cmd)
     }
     pub async fn on_super_command<F, Fut>(cmd: &'static str, hd: F)
     where
@@ -44,7 +44,7 @@ impl BotCommandBuilder {
         let mut f = BotCommandBuilder::instance_lock().write().await;
         f.subscribe(cmd, hd);
         f.super_command.insert(cmd);
-        info!("Super 命令 {} 注册成功",cmd)
+        info!("Super 命令 {} 注册成功", cmd)
     }
     fn subscribe<F, Fut>(&self, cmd: &'static str, hd: F)
     where
@@ -58,7 +58,11 @@ impl BotCommandBuilder {
                 if event.cmd.as_str() != cmd {
                     continue;
                 }
-                info!("命令执行器 {} 执行命令使用参数{:?}",event.cmd.as_str(),&*event.args);
+                info!(
+                    "命令执行器 {} 执行命令使用参数{:?}",
+                    event.cmd.as_str(),
+                    &*event.args
+                );
                 hd(event).await;
             }
         });
@@ -82,7 +86,14 @@ impl BotCommand {
     pub async fn invoke_command(&self) {
         let f = BotCommandBuilder::instance_lock().read().await;
         if f.super_command.contains(self.cmd.as_str()) {
-            if self.event.sender.role.as_ref().and_then(|r| if r == "admin" { Some(()) } else { None }).is_some() {
+            if self
+                .event
+                .sender
+                .role
+                .as_ref()
+                .and_then(|r| if r == "admin" { Some(()) } else { None })
+                .is_some()
+            {
                 self.exec_command(&f.event_bus).await;
             } else {
                 self.event.reply_and_quote("你是谁喵！我不认识你喵！哒咩！");
