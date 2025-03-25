@@ -1,7 +1,7 @@
 use crate::command_exec::app::{BotCommand, BotCommandBuilder};
-use crate::handlers::group_chat::NyaCatMemory;
+use crate::handlers::group_chat::{NyaCatMemory, LIVE};
 use crate::ml;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 pub async fn register_shell_cmd() {
     BotCommandBuilder::on_super_command("$shell", |e| exec_shell_cmd(e)).await;
@@ -12,7 +12,6 @@ pub async fn register_shell_cmd() {
     BotCommandBuilder::on_common_command("$mem_kill", |e| exec_mem_kill(e)).await;
 }
 static ID: AtomicUsize = AtomicUsize::new(1156);
-static LIVE: AtomicBool = AtomicBool::new(true);
 async fn exec_shell_cmd(e: BotCommand) {
     if !LIVE.load(Ordering::Relaxed) {
         return;

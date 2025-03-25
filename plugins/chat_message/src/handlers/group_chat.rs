@@ -10,9 +10,10 @@ use kovi::tokio::sync::RwLock;
 use kovi::{MsgEvent, RuntimeBot};
 use std::collections::{HashMap, VecDeque};
 use std::error::Error;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::time::SystemTime;
-
+pub static LIVE: AtomicBool = AtomicBool::new(true);
 pub async fn handle_group_chat(
     bot: Arc<RuntimeBot>,
     event: Arc<MsgEvent>,
@@ -27,13 +28,13 @@ pub async fn handle_group_chat(
     //有人@猫娘
     if event.message.contains("at")
         && event
-            .message
-            .get("at")
-            .get(0)
-            .and_then(|s| s.data.get("qq"))
-            .and_then(|v| v.as_str().and_then(|s| s.parse::<i64>().ok()))
-            .and_then(|e| if e == event.self_id { Some(()) } else { None })
-            .is_some()
+        .message
+        .get("at")
+        .get(0)
+        .and_then(|s| s.data.get("qq"))
+        .and_then(|v| v.as_str().and_then(|s| s.parse::<i64>().ok()))
+        .and_then(|e| if e == event.self_id { Some(()) } else { None })
+        .is_some()
     {
         at_me(event.clone()).await;
         return Ok(());
@@ -73,6 +74,9 @@ pub async fn handle_group_chat(
 }
 async fn call_me_msg(_e: Arc<MsgEvent>) {}
 async fn method_me(e: Arc<MsgEvent>) {
+    if !LIVE.load(Ordering::Relaxed) {
+        return;
+    }
     e.reply("是不是有人叫我喵");
 }
 type UnixTime = u64;
@@ -109,9 +113,9 @@ impl NyaCatMemory {
         while let Some((chat_time, msg)) = arr.pop_front() {
             if arr.len() < ChatConfigContext::get().model.role_max_message
                 && now_time - chat_time
-                    < ChatConfigContext::get()
-                        .model
-                        .role_context_expiration_time_second
+                < ChatConfigContext::get()
+                .model
+                .role_context_expiration_time_second
             {
                 arr.push_front((chat_time, msg));
                 break;
@@ -144,7 +148,12 @@ async fn at_me(e: Arc<MsgEvent>) {
         BotCommand::from_str(cmd, e.clone()).invoke_command().await;
         return;
     }
+
     //否则当成问话
+    if !LIVE.load(Ordering::Relaxed) {
+        //如果关闭了则不响应问话
+        return;
+    }
     if let Some(question) = e
         .text
         .as_ref()
