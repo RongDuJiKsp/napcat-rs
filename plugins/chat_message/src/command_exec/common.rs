@@ -2,26 +2,15 @@ use crate::command_exec::app::{BotCommand, BotCommandBuilder};
 use crate::config::SyncControl;
 use crate::handlers::group_chat::NyaCatMemory;
 use crate::ml;
-use std::sync::atomic::{AtomicUsize, Ordering};
 
 pub async fn register_common_cmd() {
-    BotCommandBuilder::on_super_command("$shell", |e| exec_shell_cmd(e)).await;
     BotCommandBuilder::on_common_command("$smart", |e| exec_smart(e)).await;
     BotCommandBuilder::on_common_command("$hi", |e| exec_hi(e)).await;
     BotCommandBuilder::on_super_command("$restart", |e| exec_live(e)).await;
     BotCommandBuilder::on_super_command("$kill", |e| exec_kill(e)).await;
     BotCommandBuilder::on_super_command("$mem_kill", |e| exec_mem_kill(e)).await;
 }
-static ID: AtomicUsize = AtomicUsize::new(1156);
-async fn exec_shell_cmd(e: BotCommand) {
-    if !SyncControl::running() {
-        return;
-    }
-    e.event.reply_and_quote(format!(
-        "shell创建成功喵！编号 {}",
-        ID.fetch_add(1, Ordering::Relaxed)
-    ))
-}
+
 async fn exec_hi(e: BotCommand) {
     if !SyncControl::running() {
         return;
