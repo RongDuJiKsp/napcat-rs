@@ -13,17 +13,16 @@ pub struct BotCommandBuilder {
 }
 static COMMAND_BUILDER: OnceLock<RwLock<BotCommandBuilder>> = OnceLock::new();
 impl BotCommandBuilder {
-    pub async fn init_event_bus() {
-        let (tx, _) = broadcast::channel(100);
-        let b = BotCommandBuilder {
-            event_bus: tx,
-            super_command: HashSet::new(),
-            common_command: HashSet::new(),
-        };
-        COMMAND_BUILDER.set(RwLock::new(b)).expect("No Twice Init");
-    }
     fn instance_lock() -> &'static RwLock<BotCommandBuilder> {
-        COMMAND_BUILDER.get().expect("NoInit")
+        COMMAND_BUILDER.get_or_init(|| {
+            let (tx, _) = broadcast::channel(100);
+            let b = BotCommandBuilder {
+                event_bus: tx,
+                super_command: HashSet::new(),
+                common_command: HashSet::new(),
+            };
+            RwLock::new(b)
+        })
     }
     pub async fn on_common_command<F, Fut>(cmd: &'static str, hd: F)
     where
