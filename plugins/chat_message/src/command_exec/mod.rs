@@ -1,2 +1,2 @@
 pub mod app;
-pub mod cmds;
+pub mod common;

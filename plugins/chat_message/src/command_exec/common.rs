@@ -4,7 +4,7 @@ use crate::handlers::group_chat::NyaCatMemory;
 use crate::ml;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-pub async fn register_shell_cmd() {
+pub async fn register_common_cmd() {
     BotCommandBuilder::on_super_command("$shell", |e| exec_shell_cmd(e)).await;
     BotCommandBuilder::on_common_command("$smart", |e| exec_smart(e)).await;
     BotCommandBuilder::on_common_command("$hi", |e| exec_hi(e)).await;
