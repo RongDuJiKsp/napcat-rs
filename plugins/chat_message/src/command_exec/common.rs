@@ -36,9 +36,10 @@ async fn exec_smart(e: BotCommand) {
     if !SyncControl::running() {
         return;
     }
-    if let Some(q) = e.args.get(0) {
+    let q = e.args.join(" ");
+    if !q.is_empty() {
         e.event.reply_and_quote(
-            ml::get_reply_as_smart_nya_cat(q)
+            ml::get_reply_as_smart_nya_cat(&q)
                 .await
                 .unwrap_or_else(|e| format!("发生错误了喵：{}", e)),
         )
