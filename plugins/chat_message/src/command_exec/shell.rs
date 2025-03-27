@@ -26,7 +26,7 @@ async fn exec_shell_cmd(e: BotCommand, bot: Arc<RuntimeBot>) {
     if let Some(sub_cmd) = arg.next() {
         match sub_cmd.as_str() {
             "help" => {
-                e.event.reply_and_quote("$shell 指令目前支持Js Shell的喵。使用$shell new 创建新shell，$shell lock 锁定个人上下文shell $shell unlock 解锁个人上下文 $shell list shell和所有者列表");
+                e.event.reply_and_quote("$shell 指令目前支持Js Shell的喵。使用$shell new 创建新shell，$shell use 切换绑定的shell,$shell lock 锁定个人上下文shell $shell unlock 解锁个人上下文 $shell list shell和所有者列表");
                 return;
             }
             "lock" => {
@@ -66,6 +66,24 @@ async fn exec_shell_cmd(e: BotCommand, bot: Arc<RuntimeBot>) {
                         .reply_and_quote("参数必须是shell编号喵,请检查参数是否正确喵");
                 }
                 return;
+            }
+            "use" => {
+                if let Some(lock_n) = arg.next().and_then(|e| e.parse::<usize>().ok()) {
+                    match ShellMemory::get()
+                        .use_shell(e.event.user_id, lock_n)
+                        .await
+                    {
+                        Ok(_) => {
+                            e.event.reply_and_quote("shell上下文切换成功喵");
+                        }
+                        Err(_) => {
+                            e.event.reply_and_quote("shell不存在或者shell不是你的喵");
+                        }
+                    }
+                } else {
+                    e.event
+                        .reply_and_quote("参数必须是shell编号喵,请检查参数是否正确喵");
+                }
             }
             "list" => {
                 let mut lines = vec![String::from("Shel列表如下喵：")];
@@ -176,6 +194,13 @@ impl ShellMemory {
         } else {
             None
         }
+    }
+    async fn use_shell(&self, uid: i64, sid: usize) -> Result<(), ()> {
+        if self.instance_gid.read().await.get(&sid).and_then(|s| if s.owner.load(Ordering::Relaxed) == uid { Some(0) } else { None }).is_some() {
+            self.user_shell.write().await.insert(uid, sid);
+            return Ok(());
+        }
+        Err(())
     }
     async fn lock_shell(&self, uid: i64, sid: usize) -> Result<(), ()> {
         if ShellMemory::get()
