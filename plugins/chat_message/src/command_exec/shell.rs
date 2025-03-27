@@ -111,10 +111,12 @@ async fn exec_shell_cmd(e: BotCommand, bot: Arc<RuntimeBot>) {
             }
             cmd => {
                 if let Some(sh) = ShellMemory::get().shell(e.event.sender.user_id).await {
+                    let mut full_cmd = vec![cmd];
+                    full_cmd.append(&mut arg.map(|x| x.as_str()).collect());
                     e.event.reply_and_quote("异步任务创建成功喵！");
                     if let Err(_) = sh
                         .js_eval_queue
-                        .send((Utc::now().timestamp(), cmd.to_string()))
+                        .send((Utc::now().timestamp(), full_cmd.join(" ")))
                         .await
                     {
                         e.event.reply_and_quote(format!(
