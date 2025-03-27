@@ -514,7 +514,6 @@ dependencies = [
  "anyhow",
  "async-openai",
  "boa_engine",
- "dashmap",
  "kovi",
  "serde",
 ]

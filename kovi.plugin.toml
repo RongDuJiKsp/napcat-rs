@@ -1,17 +1,17 @@
-[chat_message]
-enable_on_startup = true
-access_control = false
-list_mode = "WhiteList"
-
-[chat_message.access_list]
-friends = []
-groups = []
-
 [kovi-plugin-check-alllong]
 enable_on_startup = true
 access_control = false
 list_mode = "WhiteList"
 
 [kovi-plugin-check-alllong.access_list]
+friends = []
+groups = []
+
+[chat_message]
+enable_on_startup = true
+access_control = false
+list_mode = "WhiteList"
+
+[chat_message.access_list]
 friends = []
 groups = []

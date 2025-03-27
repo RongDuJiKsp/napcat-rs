@@ -1,54 +1,136 @@
 use crate::command_exec::app::{BotCommand, BotCommandBuilder};
 use crate::config::SyncControl;
-use anyhow::anyhow;
+use crate::tools::MemberInfo;
 use boa_engine::error::JsErasedError;
-use boa_engine::{JsResult, JsValue, Source};
-use dashmap::mapref::one::Ref;
-use dashmap::DashMap;
-use kovi::chrono::{DateTime, NaiveDateTime, Utc};
-use kovi::log::{info, warn};
+use boa_engine::{JsValue, Source};
+use kovi::chrono::{DateTime, Utc};
+use kovi::log::warn;
 use kovi::serde_json::value::Value;
 use kovi::tokio::sync::{mpsc, Mutex, RwLock};
-use kovi::tokio::task::spawn_blocking;
-use kovi::MsgEvent;
+use kovi::{serde_json, RuntimeBot};
 use std::collections::HashMap;
-use std::error::Error;
 use std::sync::atomic::{AtomicI64, AtomicUsize, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::thread::spawn;
-use std::time::{SystemTime, UNIX_EPOCH};
 
-async fn register_shell_cmd() {
-    BotCommandBuilder::on_super_command("$shell", |e| exec_shell_cmd(e)).await;
+pub async fn register_shell_cmd(rt_bot: Arc<RuntimeBot>) {
+    let shell_bot = rt_bot.clone();
+    BotCommandBuilder::on_super_command("$shell", move |e| exec_shell_cmd(e, shell_bot.clone()))
+        .await;
 }
-async fn exec_shell_cmd(e: BotCommand) {
+async fn exec_shell_cmd(e: BotCommand, bot: Arc<RuntimeBot>) {
     if !SyncControl::running() {
         return;
     }
     let mut arg = e.args.iter();
     if let Some(sub_cmd) = arg.next() {
         match sub_cmd.as_str() {
-            "help" => { e.event.reply_and_quote("$shell 指令目前支持Js Shell的喵。使用$shell new 创建新shell，$shell lock 锁定个人上下文shell $shell unlock 解锁个人上下文 $shell list shell和所有者列表") }
-            "lock" => {}
-            "unlock" => {}
-            "list" => {}
-            "new" => {}
+            "help" => {
+                e.event.reply_and_quote("$shell 指令目前支持Js Shell的喵。使用$shell new 创建新shell，$shell lock 锁定个人上下文shell $shell unlock 解锁个人上下文 $shell list shell和所有者列表");
+                return;
+            }
+            "lock" => {
+                if let Some(lock_n) = arg.next().and_then(|e| e.parse::<usize>().ok()) {
+                    match ShellMemory::get().lock_shell(e.event.user_id, lock_n).await {
+                        Ok(_) => {
+                            e.event.reply_and_quote(format!(
+                                "shell绑定成功喵。现在shell{lock_n}是你的了喵"
+                            ));
+                        }
+                        Err(_) => {
+                            e.event
+                                .reply_and_quote("shell不存在或者shell已经被使用了喵");
+                        }
+                    }
+                } else {
+                    e.event
+                        .reply_and_quote("参数必须是shell编号喵,请检查参数是否正确喵");
+                }
+                return;
+            }
+            "unlock" => {
+                if let Some(lock_n) = arg.next().and_then(|e| e.parse::<usize>().ok()) {
+                    match ShellMemory::get()
+                        .unlock_shell(e.event.user_id, lock_n)
+                        .await
+                    {
+                        Ok(_) => {
+                            e.event.reply_and_quote("shell解绑成功喵");
+                        }
+                        Err(_) => {
+                            e.event.reply_and_quote("shell不存在或者shell不是你的喵");
+                        }
+                    }
+                } else {
+                    e.event
+                        .reply_and_quote("参数必须是shell编号喵,请检查参数是否正确喵");
+                }
+                return;
+            }
+            "list" => {
+                let mut lines = vec![String::from("Shel列表如下喵：")];
+                for (sid, sh) in ShellMemory::get().instance_gid.read().await.iter() {
+                    let owner = sh.owner.load(Ordering::Relaxed);
+                    let owner_nick = if let Some(g) = e.event.group_id {
+                        bot.get_group_member_info(g, owner, false)
+                            .await
+                            .ok()
+                            .and_then(|a| serde_json::from_value::<MemberInfo>(a.data).ok())
+                            .map(|n| n.nickname.clone())
+                            .unwrap_or(String::from("Unknown"))
+                    } else {
+                        String::from("No Group Member")
+                    };
+                    lines.push(format!("编号{sid}的shell属于{owner}({owner_nick})喵"));
+                }
+                e.event.reply_and_quote(lines.join("\n"));
+                return;
+            }
+            "new" => {
+                let (id, _) = ShellMemory::get().new_shell(e.event.sender.user_id).await;
+                e.event
+                    .reply_and_quote(format!("shell创建成功喵！现在{id}是你的了喵"));
+            }
             cmd => {
-                if let Some(sh) = ShellMemory::get().shell(e.event.sender.user_id) {
+                if let Some(sh) = ShellMemory::get().shell(e.event.sender.user_id).await {
                     e.event.reply_and_quote("异步任务创建成功喵！");
-                    if let Err(_) = sh.js_eval_queue.send((Utc::now().timestamp(), cmd.to_string())).await {
-                        e.event.reply_and_quote(format!("Js引擎已经停止运行了喵。原因：{}", sh.exit_error.read().await.as_ref().map(|x| x.as_str()).unwrap_or("none")))
+                    if let Err(_) = sh
+                        .js_eval_queue
+                        .send((Utc::now().timestamp(), cmd.to_string()))
+                        .await
+                    {
+                        e.event.reply_and_quote(format!(
+                            "Js引擎已经停止运行了喵。原因：{}",
+                            sh.exit_error
+                                .read()
+                                .await
+                                .as_ref()
+                                .map(|x| x.as_str())
+                                .unwrap_or("none")
+                        ))
                     }
                     match sh.res_queue.lock().await.recv().await {
                         None => {
-                            e.event.reply_and_quote(format!("Js引擎已经停止运行了喵!原因：{}", sh.exit_error.read().await.as_ref().map(|x| x.as_str()).unwrap_or("none")));
+                            e.event.reply_and_quote(format!(
+                                "Js引擎已经停止运行了喵!原因：{}",
+                                sh.exit_error
+                                    .read()
+                                    .await
+                                    .as_ref()
+                                    .map(|x| x.as_str())
+                                    .unwrap_or("none")
+                            ));
                         }
-                        Some((time, res)) => {
-                            e.event.reply_and_quote(format!("任务{}的执行结果如下：{}", DateTime::from_timestamp(time, 0).unwrap().format("%Y-%m-%d %H:%M:%S"), match res {
+                        Some((time, res)) => e.event.reply_and_quote(format!(
+                            "任务{}的执行结果如下：{}",
+                            DateTime::from_timestamp(time, 0)
+                                .unwrap()
+                                .format("%Y-%m-%d %H:%M:%S"),
+                            match res {
                                 Ok(e) => e.to_string(),
-                                Err(e) => e.to_string()
-                            }))
-                        }
+                                Err(e) => e.to_string(),
+                            }
+                        )),
                     }
                 } else {
                     e.event.reply_and_quote("你没有锁定自己的shell喵");
@@ -62,26 +144,77 @@ async fn exec_shell_cmd(e: BotCommand) {
 
 #[derive(Debug, Default)]
 struct ShellMemory {
-    instance_gid: DashMap<usize, JavaScriptEngine>,
+    instance_gid: RwLock<HashMap<usize, Arc<JavaScriptEngine>>>,
     id_gen: AtomicUsize,
-    user_shell: DashMap<i64, usize>,
+    user_shell: RwLock<HashMap<i64, usize>>,
 }
 static SHELL_MEMORY: OnceLock<ShellMemory> = OnceLock::new();
 impl ShellMemory {
     fn get() -> &'static ShellMemory {
         SHELL_MEMORY.get_or_init(|| ShellMemory::default())
     }
-    fn new_shell(&self, owner: i64) -> Ref<usize, JavaScriptEngine> {
+    async fn new_shell(&self, owner: i64) -> (usize, Arc<JavaScriptEngine>) {
         let shell_id = self.id_gen.fetch_add(1, Ordering::Relaxed);
-        self.instance_gid
-            .entry(shell_id)
-            .or_insert(JavaScriptEngine::new(owner))
-            .downgrade()
+        self.user_shell.write().await.insert(owner, shell_id);
+        (
+            shell_id,
+            self.instance_gid
+                .write()
+                .await
+                .entry(shell_id)
+                .or_insert(Arc::new(JavaScriptEngine::new(owner)))
+                .clone(),
+        )
     }
-    fn shell(&self, uid: i64) -> Option<Ref<usize, JavaScriptEngine>> {
-        self.user_shell
-            .get(&uid)
-            .and_then(|i| self.instance_gid.get(i.value()))
+    async fn shell(&self, uid: i64) -> Option<Arc<JavaScriptEngine>> {
+        if let Some(shell_id) = self.user_shell.read().await.get(&uid).copied() {
+            if let Some(sh) = self.instance_gid.read().await.get(&shell_id) {
+                Some(sh.clone())
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+    async fn lock_shell(&self, uid: i64, sid: usize) -> Result<(), ()> {
+        if ShellMemory::get()
+            .instance_gid
+            .read()
+            .await
+            .get(&sid)
+            .and_then(|sh| {
+                sh.owner
+                    .compare_exchange(-1, uid, Ordering::Relaxed, Ordering::Relaxed)
+                    .ok()
+            })
+            .is_some()
+        {
+            //先加锁再插入
+            self.user_shell.write().await.insert(uid, sid);
+            Ok(())
+        } else {
+            Err(())
+        }
+    }
+    async fn unlock_shell(&self, uid: i64, sid: usize) -> Result<(), ()> {
+        //尝试删一下 删不了也没关系
+        let mut lock = self.user_shell.write().await;
+        lock.get(&uid)
+            .and_then(|x| if *x == sid { Some(*x) } else { None })
+            .and_then(|_x| lock.remove(&uid));
+        ShellMemory::get()
+            .instance_gid
+            .read()
+            .await
+            .get(&sid)
+            .and_then(|sh| {
+                sh.owner
+                    .compare_exchange(uid, -1, Ordering::Relaxed, Ordering::Relaxed)
+                    .ok()
+            })
+            .map(|_x| ())
+            .ok_or(())
     }
 }
 const JS_ENGINE_QUEUE_BUF_SIZE: usize = 50;

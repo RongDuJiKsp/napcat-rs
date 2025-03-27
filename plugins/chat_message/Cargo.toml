@@ -8,5 +8,4 @@ anyhow = "1.0.97"
 kovi.workspace = true
 serde = { version = "1.0.219", features = ["derive"] }
 async-openai = "0.28.0"
-boa_engine="0.20.0"
-dashmap = "6.1.0"
+boa_engine = "0.20.0"
