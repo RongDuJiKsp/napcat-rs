@@ -1,13 +1,12 @@
 use crate::command_exec::app::{BotCommand, BotCommandBuilder};
 use crate::config::SyncControl;
 use crate::tools::MemberInfo;
+use boa_engine::Source;
 use boa_engine::error::JsErasedError;
-use boa_engine::{JsValue, Source};
 use kovi::chrono::{DateTime, Utc};
 use kovi::log::warn;
-use kovi::serde_json::value::Value;
-use kovi::tokio::sync::{mpsc, Mutex, RwLock};
-use kovi::{serde_json, RuntimeBot};
+use kovi::tokio::sync::{Mutex, RwLock, mpsc};
+use kovi::{RuntimeBot, serde_json};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicI64, AtomicUsize, Ordering};
 use std::sync::{Arc, OnceLock};
@@ -69,10 +68,7 @@ async fn exec_shell_cmd(e: BotCommand, bot: Arc<RuntimeBot>) {
             }
             "use" => {
                 if let Some(lock_n) = arg.next().and_then(|e| e.parse::<usize>().ok()) {
-                    match ShellMemory::get()
-                        .use_shell(e.event.user_id, lock_n)
-                        .await
-                    {
+                    match ShellMemory::get().use_shell(e.event.user_id, lock_n).await {
                         Ok(_) => {
                             e.event.reply_and_quote("shell上下文切换成功喵");
                         }
@@ -146,10 +142,7 @@ async fn exec_shell_cmd(e: BotCommand, bot: Arc<RuntimeBot>) {
                             DateTime::from_timestamp(time, 0)
                                 .unwrap()
                                 .format("%Y-%m-%d %H:%M:%S"),
-                            match res {
-                                Ok(e) => e.to_string(),
-                                Err(e) => e.to_string(),
-                            }
+                            res.unwrap_or_else(|e| e.to_string())
                         )),
                     }
                 } else {
@@ -198,7 +191,20 @@ impl ShellMemory {
         }
     }
     async fn use_shell(&self, uid: i64, sid: usize) -> Result<(), ()> {
-        if self.instance_gid.read().await.get(&sid).and_then(|s| if s.owner.load(Ordering::Relaxed) == uid { Some(0) } else { None }).is_some() {
+        if self
+            .instance_gid
+            .read()
+            .await
+            .get(&sid)
+            .and_then(|s| {
+                if s.owner.load(Ordering::Relaxed) == uid {
+                    Some(0)
+                } else {
+                    None
+                }
+            })
+            .is_some()
+        {
             self.user_shell.write().await.insert(uid, sid);
             return Ok(());
         }
@@ -249,14 +255,14 @@ const JS_ENGINE_QUEUE_BUF_SIZE: usize = 50;
 struct JavaScriptEngine {
     owner: Arc<AtomicI64>,
     js_eval_queue: mpsc::Sender<(i64, String)>,
-    res_queue: Arc<Mutex<mpsc::Receiver<(i64, Result<Value, JsErasedError>)>>>,
+    res_queue: Arc<Mutex<mpsc::Receiver<(i64, Result<String, JsErasedError>)>>>,
     exit_error: Arc<RwLock<Option<String>>>,
 }
 impl JavaScriptEngine {
     fn new(owner: i64) -> JavaScriptEngine {
         let (code_tx, mut code_rx) = mpsc::channel::<(i64, String)>(JS_ENGINE_QUEUE_BUF_SIZE);
         let (resp_tx, resp_rs) =
-            mpsc::channel::<(i64, Result<Value, JsErasedError>)>(JS_ENGINE_QUEUE_BUF_SIZE);
+            mpsc::channel::<(i64, Result<String, JsErasedError>)>(JS_ENGINE_QUEUE_BUF_SIZE);
         let err_output = Arc::new(RwLock::new(None));
         let err_input = err_output.clone();
         spawn(move || {
@@ -265,14 +271,11 @@ impl JavaScriptEngine {
             while let Some((submit_time, code)) = code_rx.blocking_recv() {
                 let js_out = ctx.eval(Source::from_bytes(code.as_bytes()));
                 last_output = format!("{:?}", &js_out);
-                let rs_out: Result<Value, JsErasedError> = match js_out {
-                    Ok(val) => {
-                        if let JsValue::Undefined = &val {
-                            Ok(Value::String(String::from("undefined")))
-                        } else {
-                            val.to_json(&mut ctx).map_err(|je| je.into_erased(&mut ctx))
-                        }
-                    }
+                let rs_out: Result<String, JsErasedError> = match js_out {
+                    Ok(val) => match val.to_string(&mut ctx) {
+                        Ok(o) => Ok(o.to_std_string_escaped()),
+                        Err(e) => Err(e.into_erased(&mut ctx)),
+                    },
                     Err(e) => Err(e.into_erased(&mut ctx)),
                 };
                 if let Err(_) = resp_tx.blocking_send((submit_time, rs_out)) {
