@@ -104,7 +104,7 @@ impl NyaCatMemory {
         self.user_memory.clear();
     }
     fn load_mem(&mut self, user_id: i64, new_msg: &str) -> Vec<ChatCompletionRequestMessage> {
-        info!("用户{user_id}发出提问:{new_msg}");
+        info!("群聊或用户{user_id}发出提问:{new_msg}");
         let now_time = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .expect("System Time Error!!!!!!")
@@ -130,7 +130,7 @@ impl NyaCatMemory {
         v
     }
     fn save_mem(&mut self, user_id: i64, new_chat_msg: &str) {
-        info!("模型对用户{user_id}回答:{new_chat_msg}");
+        info!("模型对群聊或用户{user_id}回答:{new_chat_msg}");
         let now_time = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .expect("System Time Error!!!!!!")
@@ -167,7 +167,7 @@ async fn at_me(e: Arc<MsgEvent>) {
         let chat = NyaCatMemory::load()
             .write()
             .await
-            .load_mem(e.sender.user_id, question);
+            .load_mem(e.group_id.unwrap_or(e.sender.user_id), question);
         let out = ml::get_reply_as_nya_cat(chat)
             .await
             .unwrap_or_else(|e| format!("发生错误了喵：{}", e));
