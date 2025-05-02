@@ -1,11 +1,11 @@
 use crate::config::ChatConfigContext;
 use anyhow::anyhow;
-use async_openai::Client;
 use async_openai::config::OpenAIConfig;
 use async_openai::types::{
     ChatCompletionRequestMessage, ChatCompletionRequestUserMessage, CreateChatCompletionRequestArgs,
 };
-use kovi::log::warn;
+use async_openai::Client;
+use kovi::log::{error, warn};
 use std::error::Error;
 
 async fn build_client() -> Client<OpenAIConfig> {
@@ -35,11 +35,14 @@ async fn completion_chat(
         .first()
         .and_then(|c| c.finish_reason)
         .and_then(|s| Some(warn!("model finished with {:?}", s)));
+    if res.choices.is_empty() {
+        error!("Model Null Output");
+    }
     Ok(res
         .choices
         .first()
         .and_then(|c| c.message.content.clone())
-        .ok_or(anyhow!("Models No Response"))?)
+        .ok_or(anyhow!("Models No Response.Origin Output:{:?}", res))?)
 }
 async fn single_chat(s: &str, model: &str) -> Result<String, Box<dyn Error>> {
     completion_chat(

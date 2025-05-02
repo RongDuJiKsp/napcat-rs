@@ -6,7 +6,7 @@ use async_openai::types::{
     ChatCompletionRequestAssistantMessage, ChatCompletionRequestMessage,
     ChatCompletionRequestSystemMessage, ChatCompletionRequestUserMessage,
 };
-use kovi::log::info;
+use kovi::log::{error, info};
 use kovi::tokio::sync::RwLock;
 use kovi::{MsgEvent, RuntimeBot};
 use std::collections::{HashMap, VecDeque};
@@ -168,14 +168,19 @@ async fn at_me(e: Arc<MsgEvent>) {
             .write()
             .await
             .load_mem(e.group_id.unwrap_or(e.sender.user_id), question);
-        let out = ml::get_reply_as_nya_cat(chat)
-            .await
-            .unwrap_or_else(|e| format!("发生错误了喵：{}", e));
-        NyaCatMemory::load()
-            .write()
-            .await
-            .save_mem(e.sender.user_id, &out);
-        e.reply_and_quote(out)
+        match ml::get_reply_as_nya_cat(chat).await {
+            Ok(out) => {
+                NyaCatMemory::load()
+                    .write()
+                    .await
+                    .save_mem(e.sender.user_id, &out);
+                e.reply_and_quote(out);
+            }
+            Err(err) => {
+                e.reply_and_quote(format!("发生错误了喵：{}", err));
+                error!("模型在回复时发生错误：{}", err);
+            }
+        }
     } else {
         e.reply_and_quote("叫我什么事喵？");
     }
