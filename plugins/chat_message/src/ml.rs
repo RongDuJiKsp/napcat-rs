@@ -1,10 +1,10 @@
 use crate::config::ChatConfigContext;
 use anyhow::anyhow;
+use async_openai::Client;
 use async_openai::config::OpenAIConfig;
 use async_openai::types::{
     ChatCompletionRequestMessage, ChatCompletionRequestUserMessage, CreateChatCompletionRequestArgs,
 };
-use async_openai::Client;
 use kovi::log::{error, warn};
 use std::error::Error;
 
