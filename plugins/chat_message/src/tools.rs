@@ -2,7 +2,6 @@ use anyhow::anyhow;
 use kovi::serde_json;
 use kovi::{MsgEvent, RuntimeBot};
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MemberInfo {
@@ -25,7 +24,7 @@ pub struct MemberInfo {
 pub async fn self_bot_info(
     bot: &RuntimeBot,
     event: &MsgEvent,
-) -> Result<MemberInfo, Box<dyn Error>> {
+) -> Result<MemberInfo, anyhow::Error> {
     Ok(serde_json::from_value(
         bot.get_group_member_info(
             event
@@ -34,8 +33,8 @@ pub async fn self_bot_info(
             event.self_id,
             false,
         )
-        .await
-        .map_err(|e| anyhow!("{}", e.data.to_string()))?
-        .data,
+            .await
+            .map_err(|e| anyhow!("{}", e.data.to_string()))?
+            .data,
     )?)
 }

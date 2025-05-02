@@ -1,11 +1,10 @@
 use anyhow::anyhow;
-use kovi::RuntimeBot;
 use kovi::utils::load_json_data;
+use kovi::RuntimeBot;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use std::error::Error;
-use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::OnceLock;
 
 static CHAT_CONFIG: OnceLock<ChatConfigContext> = OnceLock::new();
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -31,11 +30,12 @@ pub struct ChatConfigContext {
     pub model: ChatModelCallConfig,
 }
 impl ChatConfigContext {
-    pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), Box<dyn Error>> {
+    pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
         let config = load_json_data(
             ChatConfig::default(),
             runtime_bot.get_data_path().join("chat_config.json"),
-        )?;
+        )
+            .map_err(|e| anyhow!("Error loading chat config: {}", e))?;
         CHAT_CONFIG
             .set(ChatConfigContext::from_config(&config))
             .map_err(|_e| anyhow!("初始化ChatConfigContext时出现重复设置"))?;

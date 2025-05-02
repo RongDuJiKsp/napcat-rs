@@ -10,14 +10,13 @@ use kovi::log::{error, info};
 use kovi::tokio::sync::RwLock;
 use kovi::{MsgEvent, RuntimeBot};
 use std::collections::{HashMap, VecDeque};
-use std::error::Error;
 use std::sync::{Arc, OnceLock};
 use std::time::SystemTime;
 
 pub async fn handle_group_chat(
     bot: Arc<RuntimeBot>,
     event: Arc<MsgEvent>,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<(), anyhow::Error> {
     //只考虑已经监听的群
     if !ChatConfigContext::get()
         .allow_groups
@@ -28,13 +27,13 @@ pub async fn handle_group_chat(
     //有人@猫娘
     if event.message.contains("at")
         && event
-            .message
-            .get("at")
-            .get(0)
-            .and_then(|s| s.data.get("qq"))
-            .and_then(|v| v.as_str().and_then(|s| s.parse::<i64>().ok()))
-            .and_then(|e| if e == event.self_id { Some(()) } else { None })
-            .is_some()
+        .message
+        .get("at")
+        .get(0)
+        .and_then(|s| s.data.get("qq"))
+        .and_then(|v| v.as_str().and_then(|s| s.parse::<i64>().ok()))
+        .and_then(|e| if e == event.self_id { Some(()) } else { None })
+        .is_some()
     {
         at_me(event.clone()).await;
         return Ok(());
@@ -117,9 +116,9 @@ impl NyaCatMemory {
         while let Some((chat_time, msg)) = arr.pop_front() {
             if arr.len() < ChatConfigContext::get().model.role_max_message
                 && now_time - chat_time
-                    < ChatConfigContext::get()
-                        .model
-                        .role_context_expiration_time_second
+                < ChatConfigContext::get()
+                .model
+                .role_context_expiration_time_second
             {
                 arr.push_front((chat_time, msg));
                 break;
