@@ -39,7 +39,9 @@ pub async fn handle_group_chat(
         at_me(event.clone()).await;
         return Ok(());
     }
-    for _g in find_group(&event) {
+
+    for g in find_group(&event) {
+        info!("读取到可能为群号的号码{}，正在尝试加群", g);
         // 添加请求
     }
     let bot_info = tools::self_bot_info(&bot, &event).await.ok();
