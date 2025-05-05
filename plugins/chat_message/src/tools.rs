@@ -1,6 +1,7 @@
 use anyhow::anyhow;
 use kovi::serde_json;
 use kovi::{MsgEvent, RuntimeBot};
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,8 +34,22 @@ pub async fn self_bot_info(
             event.self_id,
             false,
         )
-            .await
-            .map_err(|e| anyhow!("{}", e.data.to_string()))?
-            .data,
+        .await
+        .map_err(|e| anyhow!("{}", e.data.to_string()))?
+        .data,
     )?)
+}
+pub fn find_group(event: &MsgEvent) -> Vec<i64> {
+    let mut c = Vec::new();
+    for m in event.message.iter() {
+        c.append(&mut check_group(&m.data.to_string()));
+    }
+    c
+}
+fn check_group(text: &str) -> Vec<i64> {
+    Regex::new(r"\b\d{9,11}\b")
+        .unwrap()
+        .find_iter(text)
+        .filter_map(|mat| mat.as_str().parse::<i64>().ok())
+        .collect()
 }
