@@ -1,4 +1,5 @@
 use crate::config::{ChatConfigContext, SyncControl};
+use crate::handlers::tool::reply_as_im;
 use crate::ml;
 use anyhow::anyhow;
 use async_openai::types::{
@@ -8,12 +9,11 @@ use async_openai::types::{
 use kovi::log::{error, info};
 use kovi::tokio::sync::RwLock;
 use kovi::{MsgEvent, RuntimeBot};
+use kovi_plugin_command_exec::app::BotCommand;
 use kovi_plugin_dev_utils::infoev::InfoEv;
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, OnceLock};
 use std::time::SystemTime;
-use kovi_plugin_command_exec::app::BotCommand;
-use crate::handlers::tool::reply_as_im;
 
 pub async fn handle_group_chat(
     bot: Arc<RuntimeBot>,
@@ -123,6 +123,8 @@ impl NyaCatMemory {
             {
                 arr.push_front((chat_time, msg));
                 break;
+            } else {
+                info!("模型忘记了{:?}", msg);
             }
         }
         let mut v = vec![Self::system_msg()];
@@ -142,6 +144,7 @@ impl NyaCatMemory {
                 new_chat_msg,
             )),
         ));
+        info!("模型最终记忆：{:?}", ctx);
     }
 }
 async fn at_me(e: Arc<MsgEvent>) {
@@ -165,18 +168,16 @@ async fn at_me(e: Arc<MsgEvent>) {
         .as_ref()
         .and_then(|s| if s.len() > 0 { Some(s) } else { None })
     {
+        let ctx_id = e.group_id.unwrap_or(e.sender.user_id);
         let chat = NyaCatMemory::load()
             .write()
             .await
-            .load_mem(e.group_id.unwrap_or(e.sender.user_id), question);
+            .load_mem(ctx_id, question);
         info!("模型思考上下文：{:?}", chat);
         match ml::get_reply_as_nya_cat(chat).await {
             Ok(out) => {
-                NyaCatMemory::load()
-                    .write()
-                    .await
-                    .save_mem(e.sender.user_id, &out);
-                reply_as_im(e.clone(),&out)
+                NyaCatMemory::load().write().await.save_mem(ctx_id, &out);
+                reply_as_im(e.clone(), &out)
             }
             Err(err) => {
                 e.reply_and_quote("不想理你喵");
