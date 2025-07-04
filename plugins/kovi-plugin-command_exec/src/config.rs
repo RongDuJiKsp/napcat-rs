@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 use kovi::utils::load_json_data;
-use kovi::RuntimeBot;
+use kovi::{MsgEvent, RuntimeBot};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::OnceLock;
@@ -13,15 +13,27 @@ pub struct CommandExecConfig {
 }
 #[derive(Clone, Debug)]
 pub struct CommandExecContext {
-    pub allow_exec_groups: HashSet<i64>,
+    pub allow_exec_context: HashSet<i64>,
     pub allow_super_user: HashSet<i64>,
 }
 impl CommandExecContext {
     fn from_config(cfg: &CommandExecConfig) -> CommandExecContext {
         CommandExecContext {
-            allow_exec_groups: cfg.allow_exec_groups.iter().copied().collect(),
+            allow_exec_context: cfg.allow_exec_groups.iter().copied().collect(),
             allow_super_user: cfg.allow_super_user.iter().copied().collect(),
         }
+    }
+    pub fn event_user(ev: &MsgEvent) -> i64 {
+        ev.sender.user_id
+    }
+    pub fn event_context(ev: &MsgEvent) -> i64 {
+        ev.group_id.unwrap_or_else(|| Self::event_user(ev))
+    }
+    pub fn in_super_user(&self, ev: &MsgEvent) -> bool {
+        self.allow_super_user.contains(&Self::event_user(ev))
+    }
+    pub fn in_context(&self, ev: &MsgEvent) -> bool {
+        self.allow_exec_context.contains(&Self::event_context(ev))
     }
 }
 impl CommandExecConfig {

@@ -1,9 +1,9 @@
-use kovi::MsgEvent;
+use crate::config::{CommandExecConfig, CommandExecContext};
 use kovi::log::{error, info};
-use kovi::tokio::sync::{RwLock, broadcast};
+use kovi::tokio::sync::{broadcast, RwLock};
+use kovi::MsgEvent;
 use std::collections::HashSet;
 use std::sync::{Arc, OnceLock};
-use crate::config::CommandExecConfig;
 
 #[derive(Debug)]
 pub struct BotCommandBuilder {
@@ -85,11 +85,11 @@ impl BotCommand {
     }
     pub async fn invoke_command(&self) {
         let f = BotCommandBuilder::instance_lock().read().await;
+        if !CommandExecConfig::get().in_context(self.event.as_ref()) {
+            self.event.reply_and_quote("不认识的环境喵，害怕喵")
+        }
         if f.super_command.contains(self.cmd.as_str()) {
-            if CommandExecConfig::get()
-                .allow_super_user
-                .contains(&self.event.sender.user_id)
-            {
+            if CommandExecConfig::get().in_super_user(self.event.as_ref()) {
                 self.exec_command(&f.event_bus).await;
             } else {
                 self.event.reply_and_quote("你是谁喵！我不认识你喵！哒咩！");
