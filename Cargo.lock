@@ -447,9 +447,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck_derive"
-version = "1.9.2"
+version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ff22c2722516255d1823ce3cc4bc0b154dbc9364be5c905d6baa6eccbbc8774"
+checksum = "7ecc273b49b3205b83d648f0690daa588925572cc5063745bfe547fe7ec8e1a1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -513,7 +513,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-openai",
- "boa_engine",
  "kovi 0.11.10",
  "kovi-plugin-command-exec",
  "kovi-plugin-dev-utils",
@@ -711,9 +710,9 @@ checksum = "575f75dfd25738df5b91b8e43e14d44bda14637a58fae779fd2b064f8bf3e010"
 
 [[package]]
 name = "deranged"
-version = "0.4.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28cfac68e08048ae1883171632c2aef3ebc555621ae56fbccce1cbf22dd7f058"
+checksum = "9c9e6a11ca8224451684bc0d7d5a7adbf8f2fd6887261a1cfc3c0432f9d4068e"
 dependencies = [
  "powerfmt",
 ]
@@ -1666,7 +1665,7 @@ version = "0.1.0"
 source = "git+https://github.com/kovi-plugins/check-all-long.git#f1857cbc3abb993201939c31d43351c59fb86c83"
 dependencies = [
  "image",
- "kovi 0.11.10",
+ "kovi 0.12.3",
  "ndarray",
  "ort",
  "raqote",
@@ -1704,6 +1703,16 @@ checksum = "c8d0ef4af81488f6d756ad6531451d7ff70939f14512fe9f398ea8003bcb83dd"
 dependencies = [
  "kovi 0.12.3",
  "serde",
+]
+
+[[package]]
+name = "kovi-plugin-javascript-shell"
+version = "0.1.0"
+dependencies = [
+ "boa_engine",
+ "kovi 0.11.10",
+ "kovi-plugin-command-exec",
+ "kovi-plugin-dev-utils",
 ]
 
 [[package]]
@@ -2009,18 +2018,19 @@ dependencies = [
 
 [[package]]
 name = "num_enum"
-version = "0.7.3"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e613fc340b2220f734a8595782c551f1250e969d87d3be1ae0579e8d4065179"
+checksum = "a973b4e44ce6cad84ce69d797acf9a044532e4184c4f267913d1b546a0727b7a"
 dependencies = [
  "num_enum_derive",
+ "rustversion",
 ]
 
 [[package]]
 name = "num_enum_derive"
-version = "0.7.3"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af1844ef2428cc3e1cb900be36181049ef3d3193c63e43026cfe202983b27a56"
+checksum = "77e878c846a8abae00dd069496dbe8751b16ac1c3d6bd2a7283a938e8228f90d"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -2046,6 +2056,7 @@ dependencies = [
  "kovi-plugin-check-alllong",
  "kovi-plugin-command-exec",
  "kovi-plugin-dev-utils",
+ "kovi-plugin-javascript-shell",
 ]
 
 [[package]]

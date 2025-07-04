@@ -8,7 +8,6 @@ anyhow = "1.0.97"
 kovi.workspace = true
 serde = { version = "1.0.219", features = ["derive"] }
 async-openai = "0.29.0"
-boa_engine = "0.20.0"
 regex = "1.11.1"
 kovi-plugin-command-exec={path = "../kovi-plugin-command-exec"}
 kovi-plugin-dev-utils={path = "../kovi-plugin-dev-utils" }

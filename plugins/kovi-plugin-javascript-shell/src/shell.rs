@@ -1,16 +1,15 @@
-use crate::config::SyncControl;
-use boa_engine::Source;
 use boa_engine::error::JsErasedError;
+use boa_engine::Source;
 use kovi::chrono::{DateTime, Utc};
 use kovi::log::warn;
-use kovi::tokio::sync::{Mutex, RwLock, mpsc};
-use kovi::{RuntimeBot, serde_json};
+use kovi::tokio::sync::{mpsc, Mutex, RwLock};
+use kovi::{serde_json, RuntimeBot};
+use kovi_plugin_command_exec::app::{BotCommand, BotCommandBuilder};
+use kovi_plugin_dev_utils::infoev::MemberInfo;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicI64, AtomicUsize, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::thread::spawn;
-use kovi_plugin_command_exec::app::{BotCommand, BotCommandBuilder};
-use kovi_plugin_dev_utils::infoev::MemberInfo;
 
 pub async fn register_shell_cmd(rt_bot: Arc<RuntimeBot>) {
     let shell_bot = rt_bot.clone();
@@ -18,9 +17,6 @@ pub async fn register_shell_cmd(rt_bot: Arc<RuntimeBot>) {
         .await;
 }
 async fn exec_shell_cmd(e: BotCommand, bot: Arc<RuntimeBot>) {
-    if !SyncControl::running() {
-        return;
-    }
     let mut arg = e.args.iter();
     if let Some(sub_cmd) = arg.next() {
         match sub_cmd.as_str() {
