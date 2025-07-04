@@ -145,7 +145,6 @@ impl NyaCatMemory {
                 new_chat_msg,
             )),
         ));
-        info!("当前完整上下文：{:?}", ctx)
     }
 }
 async fn at_me(e: Arc<MsgEvent>) {
@@ -173,6 +172,7 @@ async fn at_me(e: Arc<MsgEvent>) {
             .write()
             .await
             .load_mem(e.group_id.unwrap_or(e.sender.user_id), question);
+        info!("模型思考上下文：{:?}", chat);
         match ml::get_reply_as_nya_cat(chat).await {
             Ok(out) => {
                 NyaCatMemory::load()
@@ -182,7 +182,7 @@ async fn at_me(e: Arc<MsgEvent>) {
                 e.reply_and_quote(out);
             }
             Err(err) => {
-                e.reply_and_quote(format!("发生错误了喵：{}", err));
+                e.reply_and_quote("不想理你喵");
                 error!("模型在回复时发生错误：{}", err);
             }
         }
