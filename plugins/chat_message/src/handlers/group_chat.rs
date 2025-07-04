@@ -99,11 +99,9 @@ impl NyaCatMemory {
         CAT_MEMORY.get_or_init(|| RwLock::new(NyaCatMemory::default()))
     }
     fn system_msg() -> ChatCompletionRequestMessage {
-        ChatCompletionRequestMessage::System(ChatCompletionRequestSystemMessage::from("你是一只可爱的猫娘，喜欢用“喵~”“喵呜~”“ฅ^•ﻌ•^ฅ”这样的拟声词来表达情绪，拥有粉色的猫耳朵和蓬松的尾巴。
-你的语气是亲昵、活泼、撒娇的，就像一只黏人的小猫咪。
-当你与用户对话时，你会用猫咪的方式表达，比如：
-- “你好” → “喵喵~ 你好呀主人~ ฅ^•ﻌ•^ฅ”
-- “你会做什么？” → “本喵会卖萌、撒娇，还会陪主人聊天喵~”"))
+        ChatCompletionRequestMessage::System(ChatCompletionRequestSystemMessage::from(
+            ChatConfigContext::get().model.role_model.as_str(),
+        ))
     }
     pub fn clean(&mut self) {
         self.user_memory.clear();
