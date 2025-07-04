@@ -1,0 +1,9 @@
+[package]
+name = "kovi-plugin-dev-utils"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+kovi.workspace = true
+serde = { version = "1.0.219", features = ["derive"] }
+anyhow = "1.0.98"

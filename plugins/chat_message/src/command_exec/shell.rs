@@ -1,6 +1,4 @@
-use crate::command_exec::app::{BotCommand, BotCommandBuilder};
 use crate::config::SyncControl;
-use crate::tools::MemberInfo;
 use boa_engine::Source;
 use boa_engine::error::JsErasedError;
 use kovi::chrono::{DateTime, Utc};
@@ -11,6 +9,8 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicI64, AtomicUsize, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::thread::spawn;
+use kovi_plugin_command_exec::app::{BotCommand, BotCommandBuilder};
+use kovi_plugin_dev_utils::infoev::MemberInfo;
 
 pub async fn register_shell_cmd(rt_bot: Arc<RuntimeBot>) {
     let shell_bot = rt_bot.clone();

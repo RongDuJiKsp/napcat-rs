@@ -118,9 +118,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.97"
+version = "1.0.98"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcfed56ad506cb2c684a14971b8861fdc3baaaae314b9e5f9bb532cbe3ba7a4f"
+checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
 
 [[package]]
 name = "arbitrary"
@@ -147,9 +147,9 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "async-openai"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36c566b15aa847e60a9e6c9b9b4b9d4be94bbf776804624279afa69559fea7e1"
+checksum = "31acf814d6b499e33ec894bb0fd7ddaf2665b44fbdd42b858d736449271fde0c"
 dependencies = [
  "async-openai-macros",
  "backoff",
@@ -514,7 +514,9 @@ dependencies = [
  "anyhow",
  "async-openai",
  "boa_engine",
- "kovi",
+ "kovi 0.11.10",
+ "kovi-plugin-command-exec",
+ "kovi-plugin-dev-utils",
  "regex",
  "serde",
 ]
@@ -1598,7 +1600,7 @@ dependencies = [
  "env_logger",
  "futures-util",
  "http",
- "kovi-macros",
+ "kovi-macros 0.4.0",
  "log",
  "parking_lot",
  "rand 0.8.5",
@@ -1607,7 +1609,33 @@ dependencies = [
  "serde_json",
  "thiserror 1.0.69",
  "tokio",
- "tokio-tungstenite",
+ "tokio-tungstenite 0.24.0",
+ "toml",
+ "toml_edit",
+]
+
+[[package]]
+name = "kovi"
+version = "0.12.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb6199c6fba03c05c4760611107ce630748db2a6023e4cc7245459d7e2b0d91c"
+dependencies = [
+ "ahash",
+ "chrono",
+ "croner",
+ "dialoguer",
+ "env_logger",
+ "futures-util",
+ "http",
+ "kovi-macros 0.5.2",
+ "log",
+ "parking_lot",
+ "rand 0.9.0",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.12",
+ "tokio",
+ "tokio-tungstenite 0.26.2",
  "toml",
  "toml_edit",
 ]
@@ -1623,12 +1651,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "kovi-macros"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce211a0af1b6371016bc2b0e679eda672eb5fd0624a718172f7536c1a2517368"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "kovi-plugin-check-alllong"
 version = "0.1.0"
 source = "git+https://github.com/kovi-plugins/check-all-long.git#f1857cbc3abb993201939c31d43351c59fb86c83"
 dependencies = [
  "image",
- "kovi",
+ "kovi 0.11.10",
  "ndarray",
  "ort",
  "raqote",
@@ -1637,6 +1675,35 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "ureq",
+]
+
+[[package]]
+name = "kovi-plugin-command-exec"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "kovi 0.11.10",
+ "kovi-plugin-expand-napcat",
+ "serde",
+]
+
+[[package]]
+name = "kovi-plugin-dev-utils"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "kovi 0.11.10",
+ "serde",
+]
+
+[[package]]
+name = "kovi-plugin-expand-napcat"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8d0ef4af81488f6d756ad6531451d7ff70939f14512fe9f398ea8003bcb83dd"
+dependencies = [
+ "kovi 0.12.3",
+ "serde",
 ]
 
 [[package]]
@@ -1975,8 +2042,10 @@ name = "nya-bot"
 version = "0.1.0"
 dependencies = [
  "chat_message",
- "kovi",
+ "kovi 0.11.10",
  "kovi-plugin-check-alllong",
+ "kovi-plugin-command-exec",
+ "kovi-plugin-dev-utils",
 ]
 
 [[package]]
@@ -3281,7 +3350,19 @@ dependencies = [
  "futures-util",
  "log",
  "tokio",
- "tungstenite",
+ "tungstenite 0.24.0",
+]
+
+[[package]]
+name = "tokio-tungstenite"
+version = "0.26.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a9daff607c6d2bf6c16fd681ccb7eecc83e4e2cdc1ca067ffaadfca5de7f084"
+dependencies = [
+ "futures-util",
+ "log",
+ "tokio",
+ "tungstenite 0.26.2",
 ]
 
 [[package]]
@@ -3425,6 +3506,23 @@ dependencies = [
  "rand 0.8.5",
  "sha1",
  "thiserror 1.0.69",
+ "utf-8",
+]
+
+[[package]]
+name = "tungstenite"
+version = "0.26.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4793cb5e56680ecbb1d843515b23b6de9a75eb04b66643e256a396d43be33c13"
+dependencies = [
+ "bytes",
+ "data-encoding",
+ "http",
+ "httparse",
+ "log",
+ "rand 0.9.0",
+ "sha1",
+ "thiserror 2.0.12",
  "utf-8",
 ]
 

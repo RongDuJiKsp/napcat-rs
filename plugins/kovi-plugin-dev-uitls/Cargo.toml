@@ -1,7 +1,0 @@
-[package]
-name = "kovi-plugin-dev-uitls"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-kovi.workspace = true

@@ -1,4 +1,4 @@
-use crate::command_exec::app::{BotCommand, BotCommandBuilder};
+use kovi_plugin_command_exec::app::{BotCommand, BotCommandBuilder};
 use crate::config::SyncControl;
 use crate::handlers::group_chat::NyaCatMemory;
 use crate::ml;

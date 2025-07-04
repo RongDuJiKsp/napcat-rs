@@ -1,4 +1,4 @@
-use crate::config::{CommandExecConfig, CommandExecContext};
+use crate::config::CommandExecConfig;
 use kovi::log::{error, info};
 use kovi::tokio::sync::{broadcast, RwLock};
 use kovi::MsgEvent;

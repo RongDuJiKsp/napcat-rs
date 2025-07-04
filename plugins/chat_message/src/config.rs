@@ -28,13 +28,11 @@ pub struct ChatModelCallConfig {
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct ChatConfig {
     allow_groups: Vec<i64>,
-    allow_super_user: Vec<i64>,
     model: ChatModelCallConfig,
 }
 #[derive(Debug)]
 pub struct ChatConfigContext {
     pub allow_groups: HashSet<i64>,
-    pub allow_super_user: HashSet<i64>,
     pub model: ChatModelCallConfig,
 }
 impl ChatConfigContext {
@@ -55,7 +53,6 @@ impl ChatConfigContext {
     pub fn from_config(value: &ChatConfig) -> ChatConfigContext {
         ChatConfigContext {
             allow_groups: value.allow_groups.iter().copied().collect(),
-            allow_super_user: value.allow_super_user.iter().copied().collect(),
             model: value.model.clone(),
         }
     }

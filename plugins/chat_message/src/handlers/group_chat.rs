@@ -1,7 +1,5 @@
-use crate::command_exec::app::BotCommand;
 use crate::config::{ChatConfigContext, SyncControl};
-use crate::tools::find_group;
-use crate::{ml, tools};
+use crate::ml;
 use anyhow::anyhow;
 use async_openai::types::{
     ChatCompletionRequestAssistantMessage, ChatCompletionRequestMessage,
@@ -10,9 +8,11 @@ use async_openai::types::{
 use kovi::log::{error, info};
 use kovi::tokio::sync::RwLock;
 use kovi::{MsgEvent, RuntimeBot};
+use kovi_plugin_dev_utils::infoev::InfoEv;
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, OnceLock};
 use std::time::SystemTime;
+use kovi_plugin_command_exec::app::BotCommand;
 
 pub async fn handle_group_chat(
     bot: Arc<RuntimeBot>,
@@ -40,11 +40,7 @@ pub async fn handle_group_chat(
         return Ok(());
     }
 
-    for g in find_group(&event) {
-        info!("读取到可能为群号的号码{}，正在尝试加群", g);
-        // 添加请求
-    }
-    let bot_info = tools::self_bot_info(&bot, &event).await.ok();
+    let bot_info = InfoEv::self_bot_info(&bot, &event).await.ok();
     //若有bot info
     if let Some(bot_if) = &bot_info {
         //判断消息是否有猫娘的名字

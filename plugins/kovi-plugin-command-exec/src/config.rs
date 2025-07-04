@@ -10,17 +10,23 @@ static COMMAND_EXEC_CONFIG: OnceLock<CommandExecContext> = OnceLock::new();
 pub struct CommandExecConfig {
     pub allow_exec_groups: Vec<i64>, //允许执行指令的群组上下文或者私聊上下文
     pub allow_super_user: Vec<i64>,  //允许执行特命令的用户
+    pub is_admin_super_user: bool,   //群管理是否为超级用户
+    pub is_all_user_admin: bool,
 }
 #[derive(Clone, Debug)]
 pub struct CommandExecContext {
     pub allow_exec_context: HashSet<i64>,
     pub allow_super_user: HashSet<i64>,
+    pub is_admin_super_user: bool,
+    pub is_all_user_admin: bool,
 }
 impl CommandExecContext {
     fn from_config(cfg: &CommandExecConfig) -> CommandExecContext {
         CommandExecContext {
             allow_exec_context: cfg.allow_exec_groups.iter().copied().collect(),
             allow_super_user: cfg.allow_super_user.iter().copied().collect(),
+            is_admin_super_user: cfg.is_admin_super_user,
+            is_all_user_admin: cfg.is_all_user_admin,
         }
     }
     pub fn event_user(ev: &MsgEvent) -> i64 {
@@ -30,7 +36,9 @@ impl CommandExecContext {
         ev.group_id.unwrap_or_else(|| Self::event_user(ev))
     }
     pub fn in_super_user(&self, ev: &MsgEvent) -> bool {
-        self.allow_super_user.contains(&Self::event_user(ev))
+        self.is_all_user_admin
+            || self.allow_super_user.contains(&Self::event_user(ev))
+            || (self.is_admin_super_user)
     }
     pub fn in_context(&self, ev: &MsgEvent) -> bool {
         self.allow_exec_context.contains(&Self::event_context(ev))
