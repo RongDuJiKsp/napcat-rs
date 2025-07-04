@@ -516,7 +516,6 @@ dependencies = [
  "kovi 0.11.10",
  "kovi-plugin-command-exec",
  "kovi-plugin-dev-utils",
- "regex",
  "serde",
 ]
 

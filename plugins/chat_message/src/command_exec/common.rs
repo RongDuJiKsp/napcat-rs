@@ -1,7 +1,8 @@
-use kovi_plugin_command_exec::app::{BotCommand, BotCommandBuilder};
 use crate::config::SyncControl;
 use crate::handlers::group_chat::NyaCatMemory;
+use crate::handlers::tool::reply_as_im;
 use crate::ml;
+use kovi_plugin_command_exec::app::{BotCommand, BotCommandBuilder};
 
 pub async fn register_common_cmd() {
     BotCommandBuilder::on_common_command("$smart", |e| exec_smart(e)).await;
@@ -38,8 +39,9 @@ async fn exec_smart(e: BotCommand) {
     }
     let q = e.args.join(" ");
     if !q.is_empty() {
-        e.event.reply_and_quote(
-            ml::get_reply_as_smart_nya_cat(&q)
+        reply_as_im(
+            e.event.clone(),
+            &ml::get_reply_as_smart_nya_cat(&q)
                 .await
                 .unwrap_or_else(|e| format!("发生错误了喵：{}", e)),
         )

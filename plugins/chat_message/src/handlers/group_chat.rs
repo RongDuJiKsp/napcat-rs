@@ -13,6 +13,7 @@ use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, OnceLock};
 use std::time::SystemTime;
 use kovi_plugin_command_exec::app::BotCommand;
+use crate::handlers::tool::reply_as_im;
 
 pub async fn handle_group_chat(
     bot: Arc<RuntimeBot>,
@@ -175,7 +176,7 @@ async fn at_me(e: Arc<MsgEvent>) {
                     .write()
                     .await
                     .save_mem(e.sender.user_id, &out);
-                e.reply_and_quote(out);
+                reply_as_im(e.clone(),&out)
             }
             Err(err) => {
                 e.reply_and_quote("不想理你喵");

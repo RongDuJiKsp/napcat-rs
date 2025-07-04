@@ -48,12 +48,12 @@ impl CommandExecConfig {
     pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
         let config = load_json_data(
             CommandExecConfig::default(),
-            runtime_bot.get_data_path().join("chat_config.json"),
+            runtime_bot.get_data_path().join("command_exec_config.json"),
         )
-        .map_err(|e| anyhow!("Error loading chat config: {}", e))?;
+        .map_err(|e| anyhow!("Error loading command config: {}", e))?;
         COMMAND_EXEC_CONFIG
             .set(CommandExecContext::from_config(&config))
-            .map_err(|_e| anyhow!("初始化ChatConfigContext时出现重复设置"))?;
+            .map_err(|_e| anyhow!("初始化CommandConfigContext时出现重复设置"))?;
         Ok(())
     }
     pub fn get() -> &'static CommandExecContext {
