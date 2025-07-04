@@ -1,9 +1,9 @@
-use crate::config::ChatConfigContext;
 use kovi::MsgEvent;
 use kovi::log::{error, info};
 use kovi::tokio::sync::{RwLock, broadcast};
 use std::collections::HashSet;
 use std::sync::{Arc, OnceLock};
+use crate::config::CommandExecConfig;
 
 #[derive(Debug)]
 pub struct BotCommandBuilder {
@@ -86,7 +86,7 @@ impl BotCommand {
     pub async fn invoke_command(&self) {
         let f = BotCommandBuilder::instance_lock().read().await;
         if f.super_command.contains(self.cmd.as_str()) {
-            if ChatConfigContext::get()
+            if CommandExecConfig::get()
                 .allow_super_user
                 .contains(&self.event.sender.user_id)
             {

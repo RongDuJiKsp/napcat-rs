@@ -1,0 +1,9 @@
+[package]
+name = "kovi-plugin-command_exec"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+kovi.workspace = true
+anyhow = "1.0.98"
+serde = { version = "1.0.219", features = ["derive"] }
