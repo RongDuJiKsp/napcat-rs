@@ -138,12 +138,14 @@ impl NyaCatMemory {
             .duration_since(SystemTime::UNIX_EPOCH)
             .expect("System Time Error!!!!!!")
             .as_secs();
-        self.user_memory.entry(user_id).or_default().push_back((
+        let ctx = self.user_memory.entry(user_id).or_default();
+        ctx.push_back((
             now_time,
             ChatCompletionRequestMessage::Assistant(ChatCompletionRequestAssistantMessage::from(
                 new_chat_msg,
             )),
-        ))
+        ));
+        info!("当前完整上下文：{:?}", ctx)
     }
 }
 async fn at_me(e: Arc<MsgEvent>) {
