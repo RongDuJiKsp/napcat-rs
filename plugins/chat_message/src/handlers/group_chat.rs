@@ -100,7 +100,7 @@ impl NyaCatMemory {
     }
     fn system_msg() -> ChatCompletionRequestMessage {
         ChatCompletionRequestMessage::System(ChatCompletionRequestSystemMessage::from(
-            ChatConfigContext::get().model.role_model.as_str(),
+            ChatConfigContext::get().model.role_prompt.as_str(),
         ))
     }
     pub fn clean(&mut self) {
