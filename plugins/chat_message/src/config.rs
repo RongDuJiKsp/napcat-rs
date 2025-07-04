@@ -9,15 +9,21 @@ use std::sync::OnceLock;
 static CHAT_CONFIG: OnceLock<ChatConfigContext> = OnceLock::new();
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ChatModelCallConfig {
+    //openai configs
     pub key: String,
     pub endpoint: String,
     pub max_tokens: u16,
+    //角色扮演机器人相关
     pub role_model: String,
     pub role_prompt: String,
-    pub role_context_expiration_time_second: u64,
-    pub role_max_message: usize,
+    pub role_context_expiration_time_second: u64,//角色扮演机器人的对话记忆过期时间
+    pub role_max_message: usize,//角色扮演机器人的对话窗口大小
+    //聪明机器人相关
     pub smart_model: String,
     pub smart_prompt: String,
+    //机器人对话拆分相关
+    pub dot_wait_tag: String,//机器人大段话变成对话的分隔符
+    pub dot_wait_time_ms: u64,//机器人发这大段话的时间
 }
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct ChatConfig {
