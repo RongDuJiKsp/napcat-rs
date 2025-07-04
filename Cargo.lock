@@ -1665,7 +1665,7 @@ version = "0.1.0"
 source = "git+https://github.com/kovi-plugins/check-all-long.git#f1857cbc3abb993201939c31d43351c59fb86c83"
 dependencies = [
  "image",
- "kovi 0.12.3",
+ "kovi 0.11.10",
  "ndarray",
  "ort",
  "raqote",
