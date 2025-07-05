@@ -86,7 +86,8 @@ impl BotCommand {
     pub async fn invoke_command(&self) {
         let f = BotCommandBuilder::instance_lock().read().await;
         if !CommandExecConfig::get().in_context(self.event.as_ref()) {
-            self.event.reply_and_quote("不认识的环境喵，害怕喵")
+            self.event.reply_and_quote("不认识的环境喵，害怕喵");
+            return;
         }
         if f.super_command.contains(self.cmd.as_str()) {
             if CommandExecConfig::get().in_super_user(self.event.as_ref()) {
