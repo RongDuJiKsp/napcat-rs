@@ -7,7 +7,6 @@ use crate::command_exec::common::register_common_cmd;
 use crate::config::ChatConfigContext;
 use kovi::log::error;
 use kovi::{MsgEvent, PluginBuilder as plugin, RuntimeBot};
-use kovi_plugin_command_exec::config::CommandExecConfig;
 use std::sync::Arc;
 
 #[kovi::plugin]
@@ -16,7 +15,6 @@ async fn main() {
 }
 async fn app() {
     let bot = plugin::get_runtime_bot();
-    CommandExecConfig::init(&bot).await.unwrap();
     ChatConfigContext::init(&bot)
         .await
         .expect("error on load ChatConfigContext");
