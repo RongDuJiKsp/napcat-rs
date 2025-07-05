@@ -9,9 +9,10 @@ use std::sync::OnceLock;
 static CHAT_CONFIG: OnceLock<ChatConfigContext> = OnceLock::new();
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ChatModelCallConfig {
-    //openai configs
+    //openai Api 参数 照着填即可
     pub key: String,
     pub endpoint: String,
+    //最大token限制
     pub max_tokens: u16,
     //角色扮演机器人相关
     pub role_model: String,
