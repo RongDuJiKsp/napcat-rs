@@ -11,11 +11,15 @@ pub fn reply_as_im(ev: Arc<MsgEvent>, reply: &str) {
         .collect::<Vec<_>>();
     kovi::spawn(async move {
         for reply in quotes.into_iter().filter(|x| x.len() > 0) {
-            ev.reply(reply);
             sleep(Duration::from_millis(
-                ChatConfigContext::get().model.dot_wait_time_ms,
+                ChatConfigContext::get()
+                    .model
+                    .dot_wait_pre_char_ms
+                    .map(|c| c * reply.len() as u64)
+                    .unwrap_or_else(|| ChatConfigContext::get().model.dot_wait_time_ms),
             ))
             .await;
+            ev.reply(reply);
         }
     });
 }
