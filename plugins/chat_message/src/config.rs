@@ -1,12 +1,11 @@
-use anyhow::anyhow;
-use kovi::utils::load_json_data;
 use kovi::RuntimeBot;
+use kovi_plugin_dev_utils::configinit::init_config;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::OnceLock;
 
-static CHAT_CONFIG: OnceLock<ChatConfigContext> = OnceLock::new();
+static CHAT_CONFIG: OnceLock<ChatConfig> = OnceLock::new();
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ChatModelCallConfig {
     //openai Api 参数 照着填即可
@@ -29,34 +28,15 @@ pub struct ChatModelCallConfig {
 }
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct ChatConfig {
-    allow_groups: Vec<i64>,
-    model: ChatModelCallConfig,
-}
-#[derive(Debug)]
-pub struct ChatConfigContext {
     pub allow_groups: HashSet<i64>,
     pub model: ChatModelCallConfig,
 }
-impl ChatConfigContext {
-    pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
-        let config = load_json_data(
-            ChatConfig::default(),
-            runtime_bot.get_data_path().join("chat_config.json"),
-        )
-        .map_err(|e| anyhow!("Error loading chat config: {}", e))?;
-        CHAT_CONFIG
-            .set(ChatConfigContext::from_config(&config))
-            .map_err(|_e| anyhow!("初始化ChatConfigContext时出现重复设置"))?;
-        Ok(())
+impl ChatConfig {
+    pub fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
+        init_config(runtime_bot, "chat_config.json", &CHAT_CONFIG)
     }
-    pub fn get() -> &'static ChatConfigContext {
+    pub fn get() -> &'static ChatConfig {
         CHAT_CONFIG.get().unwrap()
-    }
-    pub fn from_config(value: &ChatConfig) -> ChatConfigContext {
-        ChatConfigContext {
-            allow_groups: value.allow_groups.iter().copied().collect(),
-            model: value.model.clone(),
-        }
     }
 }
 pub struct SyncControl;

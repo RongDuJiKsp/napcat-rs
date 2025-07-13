@@ -1,4 +1,4 @@
-use crate::config::ChatConfigContext;
+use crate::config::ChatConfig;
 use anyhow::anyhow;
 use async_openai::config::OpenAIConfig;
 use async_openai::types::{
@@ -8,7 +8,7 @@ use async_openai::Client;
 use kovi::log::{error, warn};
 
 async fn build_client() -> Client<OpenAIConfig> {
-    let cfg = &ChatConfigContext::get().model;
+    let cfg = &ChatConfig::get().model;
     Client::with_config(
         OpenAIConfig::default()
             .with_api_base(&cfg.endpoint)
@@ -25,7 +25,7 @@ async fn completion_chat(
         .create(
             CreateChatCompletionRequestArgs::default()
                 .model(model)
-                .max_tokens(ChatConfigContext::get().model.max_tokens)
+                .max_tokens(ChatConfig::get().model.max_tokens)
                 .messages(msg)
                 .build()?,
         )
@@ -56,13 +56,13 @@ async fn single_chat(s: &str, model: &str) -> Result<String, anyhow::Error> {
 pub async fn get_reply_as_nya_cat(
     chat_msg: Vec<ChatCompletionRequestMessage>,
 ) -> Result<String, anyhow::Error> {
-    completion_chat(chat_msg, &ChatConfigContext::get().model.role_model).await
+    completion_chat(chat_msg, &ChatConfig::get().model.role_model).await
 }
 pub async fn get_reply_as_smart_nya_cat(q: &str) -> Result<String, anyhow::Error> {
-    let prompt = &ChatConfigContext::get().model.smart_prompt;
+    let prompt = &ChatConfig::get().model.smart_prompt;
     single_chat(
         &format!("{prompt}\n{q}"),
-        &ChatConfigContext::get().model.smart_model,
+        &ChatConfig::get().model.smart_model,
     )
     .await
 }

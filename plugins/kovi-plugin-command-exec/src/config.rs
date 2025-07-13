@@ -1,34 +1,18 @@
-use anyhow::anyhow;
-use kovi::utils::load_json_data;
 use kovi::{MsgEvent, RuntimeBot};
+use kovi_plugin_dev_utils::configinit::init_config;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::OnceLock;
 
-static COMMAND_EXEC_CONFIG: OnceLock<CommandExecContext> = OnceLock::new();
+static COMMAND_EXEC_CONFIG: OnceLock<CommandExecConfig> = OnceLock::new();
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct CommandExecConfig {
-    pub allow_exec_groups: Vec<i64>, //允许执行指令的群组上下文或者私聊上下文
-    pub allow_super_user: Vec<i64>,  //允许执行特命令的用户
-    pub is_admin_super_user: bool,   //群管理是否为超级用户
+    pub allow_exec_context: HashSet<i64>, //允许执行指令的群组上下文或者私聊上下文
+    pub allow_super_user: HashSet<i64>,   //允许执行特命令的用户
+    pub is_admin_super_user: bool,        //群管理是否为超级用户
     pub is_all_user_admin: bool,
 }
-#[derive(Clone, Debug)]
-pub struct CommandExecContext {
-    pub allow_exec_context: HashSet<i64>,
-    pub allow_super_user: HashSet<i64>,
-    pub is_admin_super_user: bool,
-    pub is_all_user_admin: bool,
-}
-impl CommandExecContext {
-    fn from_config(cfg: &CommandExecConfig) -> CommandExecContext {
-        CommandExecContext {
-            allow_exec_context: cfg.allow_exec_groups.iter().copied().collect(),
-            allow_super_user: cfg.allow_super_user.iter().copied().collect(),
-            is_admin_super_user: cfg.is_admin_super_user,
-            is_all_user_admin: cfg.is_all_user_admin,
-        }
-    }
+impl CommandExecConfig {
     pub fn event_user(ev: &MsgEvent) -> i64 {
         ev.sender.user_id
     }
@@ -45,18 +29,14 @@ impl CommandExecContext {
     }
 }
 impl CommandExecConfig {
-    pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
-        let config = load_json_data(
-            CommandExecConfig::default(),
-            runtime_bot.get_data_path().join("command_exec_config.json"),
+    pub fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
+        init_config(
+            runtime_bot,
+            "command_exec_config.json",
+            &COMMAND_EXEC_CONFIG,
         )
-        .map_err(|e| anyhow!("Error loading command config: {}", e))?;
-        COMMAND_EXEC_CONFIG
-            .set(CommandExecContext::from_config(&config))
-            .map_err(|_e| anyhow!("初始化CommandConfigContext时出现重复设置"))?;
-        Ok(())
     }
-    pub fn get() -> &'static CommandExecContext {
+    pub fn get() -> &'static CommandExecConfig {
         COMMAND_EXEC_CONFIG.get().unwrap()
     }
 }

@@ -1,9 +1,23 @@
+use crate::app::BotCommand;
 use crate::config::CommandExecConfig;
-use kovi::PluginBuilder as plugin;
+use kovi::{MsgEvent, PluginBuilder as plugin};
+use std::sync::Arc;
+
 pub mod app;
 pub mod config;
 #[kovi::plugin]
 async fn main() {
     let bot = plugin::get_runtime_bot();
-    CommandExecConfig::init(&bot).await.unwrap();
+    CommandExecConfig::init(&bot).unwrap();
+    plugin::on_msg(|msg| on_msg(msg));
+}
+
+async fn on_msg(e: Arc<MsgEvent>) {
+    if let Some(cmd) = e
+        .text
+        .as_ref()
+        .and_then(|e| if e.starts_with("$") { Some(e) } else { None })
+    {
+        BotCommand::from_str(cmd, e.clone()).invoke_command().await;
+    }
 }

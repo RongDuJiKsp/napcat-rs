@@ -4,8 +4,9 @@ fn main() {
     build_bot!(
         kovi_plugin_command_exec,
         kovi_plugin_javascript_shell,
-        chat_message,
         kovi_plugin_check_alllong,
+        chat_message,
+        kovi_plugin_emoji_attack,
     )
     .run();
 }
