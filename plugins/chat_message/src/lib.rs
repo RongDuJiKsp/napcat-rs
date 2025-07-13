@@ -4,7 +4,7 @@ mod handlers;
 mod ml;
 
 use crate::command_exec::common::register_common_cmd;
-use crate::config::ChatConfigContext;
+use crate::config::ChatConfig;
 use kovi::log::error;
 use kovi::{MsgEvent, PluginBuilder as plugin, RuntimeBot};
 use std::sync::Arc;
@@ -15,9 +15,9 @@ async fn main() {
 }
 async fn app() {
     let bot = plugin::get_runtime_bot();
-    ChatConfigContext::init(&bot)
+    ChatConfig::init(&bot)
         .await
-        .expect("error on load ChatConfigContext");
+        .expect("error on load ChatConfig");
     register_common_cmd().await;
     plugin::on_msg(move |event| on_group_msg(bot.clone(), event))
 }

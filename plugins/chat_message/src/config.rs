@@ -6,7 +6,7 @@ use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::OnceLock;
 
-static CHAT_CONFIG: OnceLock<ChatConfigContext> = OnceLock::new();
+static CHAT_CONFIG: OnceLock<ChatConfig> = OnceLock::new();
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ChatModelCallConfig {
     //openai Api 参数 照着填即可
@@ -29,15 +29,10 @@ pub struct ChatModelCallConfig {
 }
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct ChatConfig {
-    allow_groups: Vec<i64>,
-    model: ChatModelCallConfig,
-}
-#[derive(Debug)]
-pub struct ChatConfigContext {
     pub allow_groups: HashSet<i64>,
     pub model: ChatModelCallConfig,
 }
-impl ChatConfigContext {
+impl ChatConfig {
     pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
         let config = load_json_data(
             ChatConfig::default(),
@@ -45,15 +40,15 @@ impl ChatConfigContext {
         )
         .map_err(|e| anyhow!("Error loading chat config: {}", e))?;
         CHAT_CONFIG
-            .set(ChatConfigContext::from_config(&config))
-            .map_err(|_e| anyhow!("初始化ChatConfigContext时出现重复设置"))?;
+            .set(config)
+            .map_err(|_e| anyhow!("初始化ChatConfig时出现重复设置"))?;
         Ok(())
     }
-    pub fn get() -> &'static ChatConfigContext {
+    pub fn get() -> &'static ChatConfig {
         CHAT_CONFIG.get().unwrap()
     }
-    pub fn from_config(value: &ChatConfig) -> ChatConfigContext {
-        ChatConfigContext {
+    pub fn from_config(value: &ChatConfig) -> ChatConfig {
+        ChatConfig {
             allow_groups: value.allow_groups.iter().copied().collect(),
             model: value.model.clone(),
         }

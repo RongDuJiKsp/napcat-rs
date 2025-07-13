@@ -1,4 +1,4 @@
-use crate::config::{ChatConfigContext, SyncControl};
+use crate::config::{ChatConfig, SyncControl};
 use crate::handlers::tool::reply_as_im;
 use crate::ml;
 use anyhow::anyhow;
@@ -20,7 +20,7 @@ pub async fn handle_group_chat(
     event: Arc<MsgEvent>,
 ) -> Result<(), anyhow::Error> {
     //只考虑已经监听的群
-    if !ChatConfigContext::get()
+    if !ChatConfig::get()
         .allow_groups
         .contains(&event.group_id.ok_or(anyhow!("找不到群id"))?)
     {
@@ -97,7 +97,7 @@ impl NyaCatMemory {
     }
     fn system_msg() -> ChatCompletionRequestMessage {
         ChatCompletionRequestMessage::System(ChatCompletionRequestSystemMessage::from(
-            ChatConfigContext::get().model.role_prompt.as_str(),
+            ChatConfig::get().model.role_prompt.as_str(),
         ))
     }
     pub fn clean(&mut self) {
@@ -115,11 +115,9 @@ impl NyaCatMemory {
             ChatCompletionRequestMessage::User(ChatCompletionRequestUserMessage::from(new_msg)),
         ));
         while let Some((chat_time, msg)) = arr.pop_front() {
-            if arr.len() < ChatConfigContext::get().model.role_max_message
+            if arr.len() < ChatConfig::get().model.role_max_message
                 && now_time - chat_time
-                    < ChatConfigContext::get()
-                        .model
-                        .role_context_expiration_time_second
+                    < ChatConfig::get().model.role_context_expiration_time_second
             {
                 arr.push_front((chat_time, msg));
                 break;
