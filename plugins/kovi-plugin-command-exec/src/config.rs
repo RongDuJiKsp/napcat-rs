@@ -1,6 +1,5 @@
-use anyhow::anyhow;
-use kovi::utils::load_json_data;
 use kovi::{MsgEvent, RuntimeBot};
+use kovi_plugin_dev_utils::configinit::init_config;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::OnceLock;
@@ -31,15 +30,12 @@ impl CommandExecConfig {
 }
 impl CommandExecConfig {
     pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
-        let config = load_json_data(
-            CommandExecConfig::default(),
-            runtime_bot.get_data_path().join("command_exec_config.json"),
+        init_config(
+            runtime_bot,
+            "command_exec_config.json",
+            &COMMAND_EXEC_CONFIG,
         )
-        .map_err(|e| anyhow!("Error loading command config: {}", e))?;
-        COMMAND_EXEC_CONFIG
-            .set(config)
-            .map_err(|_e| anyhow!("初始化CommandConfig时出现重复设置"))?;
-        Ok(())
+        .await
     }
     pub fn get() -> &'static CommandExecConfig {
         COMMAND_EXEC_CONFIG.get().unwrap()

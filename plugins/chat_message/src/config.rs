@@ -1,6 +1,5 @@
-use anyhow::anyhow;
-use kovi::utils::load_json_data;
 use kovi::RuntimeBot;
+use kovi_plugin_dev_utils::configinit::init_config;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -34,24 +33,10 @@ pub struct ChatConfig {
 }
 impl ChatConfig {
     pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
-        let config = load_json_data(
-            ChatConfig::default(),
-            runtime_bot.get_data_path().join("chat_config.json"),
-        )
-        .map_err(|e| anyhow!("Error loading chat config: {}", e))?;
-        CHAT_CONFIG
-            .set(config)
-            .map_err(|_e| anyhow!("初始化ChatConfig时出现重复设置"))?;
-        Ok(())
+        init_config(runtime_bot, "chat_config.json", &CHAT_CONFIG).await
     }
     pub fn get() -> &'static ChatConfig {
         CHAT_CONFIG.get().unwrap()
-    }
-    pub fn from_config(value: &ChatConfig) -> ChatConfig {
-        ChatConfig {
-            allow_groups: value.allow_groups.iter().copied().collect(),
-            model: value.model.clone(),
-        }
     }
 }
 pub struct SyncControl;
