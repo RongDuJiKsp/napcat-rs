@@ -46,7 +46,7 @@ pub async fn handle_cmd(e: BotCommand) {
     let data = EmojiAttackData::get();
     let mut lock = data.write().await;
 
-    match e.args.get(0).unwrap_or(&NULL_STR).as_str() {
+    let result = match e.args.get(0).unwrap_or(&NULL_STR).as_str() {
         "add" => lock.group_users.entry(group_id).or_default().insert(target),
         "del" => lock
             .group_users
@@ -55,6 +55,8 @@ pub async fn handle_cmd(e: BotCommand) {
             .remove(&target),
         _ => false,
     };
+    e.event
+        .reply(format!("操作{}喵！", if result { "成功" } else { "失败" }));
 }
 
 pub async fn register_cmd() {
