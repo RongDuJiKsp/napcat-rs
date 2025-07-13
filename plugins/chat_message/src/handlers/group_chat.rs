@@ -9,7 +9,6 @@ use async_openai::types::{
 use kovi::log::{error, info};
 use kovi::tokio::sync::RwLock;
 use kovi::{MsgEvent, RuntimeBot};
-use kovi_plugin_command_exec::app::BotCommand;
 use kovi_plugin_dev_utils::infoev::InfoEv;
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, OnceLock};
@@ -146,13 +145,8 @@ impl NyaCatMemory {
     }
 }
 async fn at_me(e: Arc<MsgEvent>) {
-    //如果是指令则处理指令
-    if let Some(cmd) = e
-        .text
-        .as_ref()
-        .and_then(|e| if e.starts_with("$") { Some(e) } else { None })
-    {
-        BotCommand::from_str(cmd, e.clone()).invoke_command().await;
+    //如果是指令则忽略问话
+    if e.text.as_ref().map(|e| e.starts_with("$")).unwrap_or(true) {
         return;
     }
 
