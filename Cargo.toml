@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 chat_message = { version = "0.1.0", path = "plugins/chat_message" }
-kovi = "=0.11.10"
+kovi = "0.12.4"
 kovi-plugin-check-alllong = { git = "https://github.com/kovi-plugins/check-all-long.git", version = "0.1.0" }
 kovi-plugin-javascript-shell = { path = "plugins/kovi-plugin-javascript-shell" }
 kovi-plugin-command-exec = { path = "plugins/kovi-plugin-command-exec" }
@@ -16,4 +16,5 @@ kovi-plugin-emoji-attack = { version = "0.1.0", path = "plugins/kovi-plugin-emoj
 members = ["plugins/chat_message", "plugins/kovi-plugin-command-exec", "plugins/kovi-plugin-dev-utils", "plugins/kovi-plugin-emoji-attack", "plugins/kovi-plugin-javascript-shell"]
 
 [workspace.dependencies]
-kovi = "=0.11.10"
+kovi = "0.12.4"
+

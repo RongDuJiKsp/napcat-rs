@@ -513,7 +513,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-openai",
- "kovi 0.11.10",
+ "kovi 0.12.4",
  "kovi-plugin-command-exec",
  "kovi-plugin-dev-utils",
  "serde",
@@ -1614,9 +1614,9 @@ dependencies = [
 
 [[package]]
 name = "kovi"
-version = "0.12.3"
+version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb6199c6fba03c05c4760611107ce630748db2a6023e4cc7245459d7e2b0d91c"
+checksum = "619ee082b2b32d559112d0d0403f5bff30694dab72ec369f9e66a4c9dc7f8f1e"
 dependencies = [
  "ahash",
  "chrono",
@@ -1680,7 +1680,7 @@ name = "kovi-plugin-command-exec"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "kovi 0.11.10",
+ "kovi 0.12.4",
  "kovi-plugin-expand-napcat",
  "serde",
 ]
@@ -1690,7 +1690,7 @@ name = "kovi-plugin-dev-utils"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "kovi 0.11.10",
+ "kovi 0.12.4",
  "serde",
 ]
 
@@ -1699,7 +1699,7 @@ name = "kovi-plugin-emoji-attack"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "kovi 0.11.10",
+ "kovi 0.12.4",
  "kovi-plugin-command-exec",
  "kovi-plugin-expand-napcat",
  "serde",
@@ -1711,7 +1711,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c8d0ef4af81488f6d756ad6531451d7ff70939f14512fe9f398ea8003bcb83dd"
 dependencies = [
- "kovi 0.12.3",
+ "kovi 0.12.4",
  "serde",
 ]
 
@@ -1720,7 +1720,7 @@ name = "kovi-plugin-javascript-shell"
 version = "0.1.0"
 dependencies = [
  "boa_engine",
- "kovi 0.11.10",
+ "kovi 0.12.4",
  "kovi-plugin-command-exec",
  "kovi-plugin-dev-utils",
 ]
@@ -2062,7 +2062,7 @@ name = "nya-bot"
 version = "0.1.0"
 dependencies = [
  "chat_message",
- "kovi 0.11.10",
+ "kovi 0.12.4",
  "kovi-plugin-check-alllong",
  "kovi-plugin-command-exec",
  "kovi-plugin-emoji-attack",
