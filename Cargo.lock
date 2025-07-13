@@ -1681,7 +1681,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "kovi 0.12.4",
- "kovi-plugin-expand-napcat",
+ "kovi-plugin-dev-utils",
  "serde",
 ]
 
