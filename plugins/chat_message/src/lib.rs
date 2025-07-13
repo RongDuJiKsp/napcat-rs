@@ -15,9 +15,7 @@ async fn main() {
 }
 async fn app() {
     let bot = plugin::get_runtime_bot();
-    ChatConfig::init(&bot)
-        .await
-        .expect("error on load ChatConfig");
+    ChatConfig::init(&bot).expect("error on load ChatConfig");
     register_common_cmd().await;
     plugin::on_msg(move |event| on_group_msg(bot.clone(), event))
 }

@@ -1688,6 +1688,7 @@ dependencies = [
  "anyhow",
  "kovi",
  "kovi-plugin-command-exec",
+ "kovi-plugin-dev-utils",
  "kovi-plugin-expand-napcat",
  "serde",
 ]

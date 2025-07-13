@@ -29,13 +29,12 @@ impl CommandExecConfig {
     }
 }
 impl CommandExecConfig {
-    pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
+    pub fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
         init_config(
             runtime_bot,
             "command_exec_config.json",
             &COMMAND_EXEC_CONFIG,
         )
-        .await
     }
     pub fn get() -> &'static CommandExecConfig {
         COMMAND_EXEC_CONFIG.get().unwrap()

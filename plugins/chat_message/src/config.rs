@@ -32,8 +32,8 @@ pub struct ChatConfig {
     pub model: ChatModelCallConfig,
 }
 impl ChatConfig {
-    pub async fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
-        init_config(runtime_bot, "chat_config.json", &CHAT_CONFIG).await
+    pub fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
+        init_config(runtime_bot, "chat_config.json", &CHAT_CONFIG)
     }
     pub fn get() -> &'static ChatConfig {
         CHAT_CONFIG.get().unwrap()
