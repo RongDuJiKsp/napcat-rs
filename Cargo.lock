@@ -1695,6 +1695,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "kovi-plugin-emoji-attack"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "kovi 0.11.10",
+ "kovi-plugin-command-exec",
+ "kovi-plugin-expand-napcat",
+ "serde",
+]
+
+[[package]]
 name = "kovi-plugin-expand-napcat"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2054,6 +2065,7 @@ dependencies = [
  "kovi 0.11.10",
  "kovi-plugin-check-alllong",
  "kovi-plugin-command-exec",
+ "kovi-plugin-emoji-attack",
  "kovi-plugin-javascript-shell",
 ]
 

@@ -9,10 +9,11 @@ kovi = "=0.11.10"
 kovi-plugin-check-alllong = { git = "https://github.com/kovi-plugins/check-all-long.git", version = "0.1.0" }
 kovi-plugin-javascript-shell = { path = "plugins/kovi-plugin-javascript-shell" }
 kovi-plugin-command-exec = { path = "plugins/kovi-plugin-command-exec" }
+kovi-plugin-emoji-attack = { version = "0.1.0", path = "plugins/kovi-plugin-emoji-attack" }
 
 
 [workspace]
-members = ["plugins/chat_message", "plugins/kovi-plugin-command-exec", "plugins/kovi-plugin-dev-utils", "plugins/kovi-plugin-javascript-shell"]
+members = ["plugins/chat_message", "plugins/kovi-plugin-command-exec", "plugins/kovi-plugin-dev-utils", "plugins/kovi-plugin-emoji-attack", "plugins/kovi-plugin-javascript-shell"]
 
 [workspace.dependencies]
 kovi = "=0.11.10"

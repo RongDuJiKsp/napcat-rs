@@ -5,7 +5,6 @@ fn main() {
         kovi_plugin_command_exec,
         kovi_plugin_javascript_shell,
         chat_message,
-        kovi_plugin_check_alllong,
     )
     .run();
 }
