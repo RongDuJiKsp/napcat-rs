@@ -60,6 +60,10 @@ pub async fn handle_cmd(e: BotCommand) {
             .entry(group_id)
             .or_default()
             .remove(&target),
+        "clean" => {
+            lock.group_users.entry(group_id).or_default().clear();
+            true
+        }
         _ => false,
     };
     e.event
