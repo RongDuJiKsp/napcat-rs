@@ -8,7 +8,8 @@ static EMOJI_ATTACK_CONFIG: OnceLock<EmojiAttackConfig> = OnceLock::new();
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct EmojiAttackConfig {
     pub allow_monkey_groups: HashSet<i64>, //允许对标记的用户贴emoji的群组上下文
-    pub emoji: String,
+    pub emoji: Vec<String>,
+    pub wait_ms: Option<u64>,
 }
 
 impl EmojiAttackConfig {

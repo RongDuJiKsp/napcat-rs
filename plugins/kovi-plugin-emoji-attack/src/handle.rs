@@ -2,10 +2,13 @@ use crate::config::EmojiAttackConfig;
 use crate::data::EmojiAttackData;
 use kovi::event::GroupMsgEvent;
 use kovi::log::error;
+use kovi::tokio::time::sleep;
 use kovi::RuntimeBot;
 use kovi_plugin_command_exec::app::{BotCommand, BotCommandBuilder};
 use kovi_plugin_expand_napcat::NapCatApi;
 use std::sync::Arc;
+use std::time::Duration;
+
 static NULL_STR: String = String::new();
 pub async fn handle_group_msg(e: Arc<GroupMsgEvent>, bot: Arc<RuntimeBot>) {
     if !EmojiAttackConfig::get()
@@ -24,11 +27,15 @@ pub async fn handle_group_msg(e: Arc<GroupMsgEvent>, bot: Arc<RuntimeBot>) {
     {
         return;
     }
-    if let Err(e) = bot
-        .set_msg_emoji_like(e.message_id as i64, EmojiAttackConfig::get().emoji.as_str())
-        .await
-    {
-        error!("Failed to set message emoji literally: {}", e);
+    let c = EmojiAttackConfig::get();
+    for ji in &c.emoji {
+        if let Err(e) = bot
+            .set_msg_emoji_like(e.message_id as i64, ji.as_str())
+            .await
+        {
+            error!("Failed to set message emoji literally: {}", e);
+        }
+        sleep(Duration::from_millis(c.wait_ms.unwrap_or(300))).await;
     }
 }
 pub async fn handle_cmd(e: BotCommand) {
@@ -53,6 +60,10 @@ pub async fn handle_cmd(e: BotCommand) {
             .entry(group_id)
             .or_default()
             .remove(&target),
+        "clean" => {
+            lock.group_users.entry(group_id).or_default().clear();
+            true
+        }
         _ => false,
     };
     e.event
