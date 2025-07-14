@@ -1,4 +1,4 @@
-use crate::config::SyncControl;
+use crate::config::{ChatConfig, SyncControl};
 use crate::handlers::group_chat::NyaCatMemory;
 use crate::handlers::tool::reply_as_im;
 use crate::ml;
@@ -13,6 +13,9 @@ pub async fn register_common_cmd() {
 }
 
 async fn exec_hi(e: BotCommand) {
+    if !ok_exec(&e) {
+        return;
+    }
     if !SyncControl::running() {
         return;
     }
@@ -20,6 +23,9 @@ async fn exec_hi(e: BotCommand) {
         .reply_and_quote("你好喵！我是一只猫娘喵！前面忘了中间忘了，反正我是一只猫娘喵")
 }
 async fn exec_kill(e: BotCommand) {
+    if !ok_exec(&e) {
+        return;
+    }
     if !SyncControl::running() {
         return;
     }
@@ -27,6 +33,9 @@ async fn exec_kill(e: BotCommand) {
     SyncControl::set_bot_run(false);
 }
 async fn exec_live(e: BotCommand) {
+    if !ok_exec(&e) {
+        return;
+    }
     if SyncControl::running() {
         return;
     }
@@ -34,6 +43,9 @@ async fn exec_live(e: BotCommand) {
     SyncControl::set_bot_run(true);
 }
 async fn exec_smart(e: BotCommand) {
+    if !ok_exec(&e) {
+        return;
+    }
     if !SyncControl::running() {
         return;
     }
@@ -50,6 +62,15 @@ async fn exec_smart(e: BotCommand) {
     }
 }
 async fn exec_mem_kill(e: BotCommand) {
+    if !ok_exec(&e) {
+        return;
+    }
     NyaCatMemory::load().write().await.clean();
     e.event.reply_and_quote("猫娘的记忆被抹除成功了喵！");
+}
+fn ok_exec(e: &BotCommand) -> bool {
+    e.event
+        .group_id
+        .map(|id| ChatConfig::get().allow_groups.contains(&id))
+        .unwrap_or(false)
 }
