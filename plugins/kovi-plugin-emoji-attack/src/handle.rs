@@ -118,7 +118,14 @@ async fn handle_attack_cmd(e: &BotCommand, cmd: &str) {
         .collect::<Vec<_>>();
     match cmd {
         "atk" => {
-            let emoji_list = { (1..=20).map(|x| x.to_string()).collect::<Vec<_>>() };
+            let emoji_list = {
+                //过滤无效表情
+                let emoji_blacklist = HashSet::from([17]);
+                (1..=21)
+                    .filter(|x| !emoji_blacklist.contains(x))
+                    .map(|x| x.to_string())
+                    .collect::<Vec<_>>()
+            };
             for target in &target_msg {
                 for ji in &emoji_list {
                     if let Err(e) = e.bot.set_msg_emoji_like(*target, ji.as_str()).await {
