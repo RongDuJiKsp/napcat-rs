@@ -1,7 +1,6 @@
 use crate::config::EmojiAttackConfig;
 use crate::data::EmojiAttackData;
 use kovi::event::GroupMsgEvent;
-use kovi::futures_util::stream::iter;
 use kovi::log::error;
 use kovi::tokio::time::sleep;
 use kovi::RuntimeBot;
@@ -9,7 +8,6 @@ use kovi_plugin_command_exec::app::{BotCommand, BotCommandBuilder};
 use kovi_plugin_expand_napcat::NapCatApi;
 use std::collections::HashSet;
 use std::sync::Arc;
-use std::time::Duration;
 
 static NULL_STR: String = String::new();
 pub async fn handle_group_msg(e: Arc<GroupMsgEvent>, bot: Arc<RuntimeBot>) {
