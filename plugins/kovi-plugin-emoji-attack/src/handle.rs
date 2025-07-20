@@ -1,6 +1,7 @@
 use crate::config::EmojiAttackConfig;
 use crate::data::EmojiAttackData;
 use kovi::event::GroupMsgEvent;
+use kovi::futures_util::stream::iter;
 use kovi::log::error;
 use kovi::tokio::time::sleep;
 use kovi::RuntimeBot;
@@ -36,8 +37,29 @@ pub async fn handle_group_msg(e: Arc<GroupMsgEvent>, bot: Arc<RuntimeBot>) {
         {
             error!("Failed to set message emoji literally: {}", e);
         }
-        sleep(Duration::from_millis(c.wait_ms.unwrap_or(300))).await;
+        sleep(c.wait_duration()).await;
     }
+}
+fn get_targets(e: &BotCommand) -> Vec<i64> {
+    let mut targets = e
+        .event
+        .message
+        .get("at")
+        .iter()
+        .filter_map(|s| s.data.get("qq"))
+        .filter_map(|v| v.as_str())
+        .filter_map(|s| s.parse::<i64>().ok())
+        .filter(|x| *x != e.event.self_id)
+        .collect::<Vec<_>>();
+    if e.args.len() > 1 {
+        targets.append(
+            &mut e.args[1..]
+                .iter()
+                .filter_map(|x| x.parse::<i64>().ok())
+                .collect::<Vec<_>>(),
+        );
+    }
+    targets
 }
 async fn handle_cmd(e: BotCommand) {
     let group_id = match e.event.group_id {
@@ -49,29 +71,13 @@ async fn handle_cmd(e: BotCommand) {
         handle_auto_cmd(&e, command, group_id).await;
         return;
     }
+    if HashSet::from(["atk", "once"]).contains(command) {
+        handle_attack_cmd(&e, command).await;
+        return;
+    }
 }
 async fn handle_auto_cmd(e: &BotCommand, cmd: &str, group_id: i64) {
-    let targets = {
-        let mut targets = e
-            .event
-            .message
-            .get("at")
-            .iter()
-            .filter_map(|s| s.data.get("qq"))
-            .filter_map(|v| v.as_str())
-            .filter_map(|s| s.parse::<i64>().ok())
-            .filter(|x| *x != e.event.self_id)
-            .collect::<Vec<_>>();
-        if e.args.len() > 1 {
-            targets.append(
-                &mut e.args[1..]
-                    .iter()
-                    .filter_map(|x| x.parse::<i64>().ok())
-                    .collect::<Vec<_>>(),
-            );
-        }
-        targets
-    };
+    let targets = get_targets(e);
     let data = EmojiAttackData::get();
     let mut lock = data.write().await;
 
@@ -101,6 +107,44 @@ async fn handle_auto_cmd(e: &BotCommand, cmd: &str, group_id: i64) {
     e.event
         .reply(format!("操作{}喵！", if result { "成功" } else { "失败" }));
 }
+async fn handle_attack_cmd(e: &BotCommand, cmd: &str) {
+    let c = EmojiAttackConfig::get();
+    let target_msg = e
+        .event
+        .message
+        .get("reply")
+        .iter()
+        .filter_map(|s| s.data.get("id"))
+        .filter_map(|v| v.as_str())
+        .filter_map(|s| s.parse::<i64>().ok())
+        .collect::<Vec<_>>();
+    match cmd {
+        "atk" => {
+            let emoji_list = { (1..=20).map(|x| x.to_string()).collect::<Vec<_>>() };
+            for target in &target_msg {
+                for ji in &emoji_list {
+                    if let Err(e) = e.bot.set_msg_emoji_like(*target, ji.as_str()).await {
+                        error!("Failed to set message emoji literally: {}", e);
+                    }
+                    sleep(c.wait_duration()).await;
+                }
+            }
+        }
+        "once" => {
+            for target in &target_msg {
+                for ji in &c.emoji {
+                    if let Err(e) = e.bot.set_msg_emoji_like(*target, ji.as_str()).await {
+                        error!("Failed to set message emoji literally: {}", e);
+                    }
+                    sleep(c.wait_duration()).await;
+                }
+            }
+        }
+        _ => {
+            error!("存在处理器处理不了的命令");
+        }
+    }
+}
 pub async fn register_cmd() {
-    BotCommandBuilder::on_super_command("$monkey", |e| handle_cmd(e)).await;
+    BotCommandBuilder::on_super_command("$monkey", move |e| handle_cmd(e)).await;
 }
