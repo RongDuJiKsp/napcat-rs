@@ -26,15 +26,14 @@ pub async fn handle_group_chat(
         return Ok(());
     }
     //有人@猫娘
-    if event.message.contains("at")
-        && event
-            .message
-            .get("at")
-            .get(0)
-            .and_then(|s| s.data.get("qq"))
-            .and_then(|v| v.as_str().and_then(|s| s.parse::<i64>().ok()))
-            .and_then(|e| if e == event.self_id { Some(()) } else { None })
-            .is_some()
+    if event
+        .message
+        .get("at")
+        .iter()
+        .filter_map(|s| s.data.get("qq"))
+        .filter_map(|v| v.as_str())
+        .filter_map(|s| s.parse::<i64>().ok())
+        .any(|e| e == event.self_id)
     {
         at_me(event.clone()).await;
         return Ok(());

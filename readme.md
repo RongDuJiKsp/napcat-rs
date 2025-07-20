@@ -108,5 +108,8 @@ NyaCat Bot 是一个基于 `kovi` 和 `napcat` 的猫娘机器人，支持指令
 * `$restart`: 重新启动机器人服务，使其恢复响应.
 * `$kill`: 停止机器人服务，使其不再响应指令和消息.
 * `$mem_kill`: 清除猫娘的记忆.
-* `$monkey add [qq_code]`: 在这个群内给qq号对应的人自动贴表情.
-* `$monkey del [qq_code]`: 移除前面的自动设置.
+* `$monkey add [qq_code...] [at...]`: 在这个群内给qq号对应的人自动贴表情.
+* `$monkey del [qq_code...] [at...]`: 移除前面的自动设置.
+* `$monkey clean`: 清空前面的自动设置.
+* `$monkey atk [reply]`: 使用表情轰炸某条消息.
+* `$monkey once [reply]`: 对某条消息执行一次自动贴表情.
