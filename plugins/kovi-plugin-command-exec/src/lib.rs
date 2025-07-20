@@ -17,10 +17,13 @@ async fn main() {
 }
 
 async fn on_msg(e: Arc<MsgEvent>) {
-    if let Some(cmd) = e
-        .text
-        .as_ref()
-        .and_then(|e| if e.starts_with("$") { Some(e) } else { None })
+    for cmd in e
+        .message
+        .get("text")
+        .iter()
+        .filter_map(|e| e.data.get("text"))
+        .filter_map(|v| v.as_str())
+        .filter(|str| str.starts_with("$"))
     {
         BotCommand::from_str(cmd, e.clone()).invoke_command().await;
     }
