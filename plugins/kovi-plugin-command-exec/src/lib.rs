@@ -1,4 +1,4 @@
-use crate::app::BotCommand;
+use crate::app::{BotCommand, GLOBAL_BOT};
 use crate::config::CommandExecConfig;
 use kovi::{MsgEvent, PluginBuilder as plugin};
 use std::sync::Arc;
@@ -9,6 +9,10 @@ pub mod config;
 async fn main() {
     let bot = plugin::get_runtime_bot();
     CommandExecConfig::init(&bot).unwrap();
+    GLOBAL_BOT
+        .set(bot.clone())
+        .map_err(|_e| anyhow::anyhow!("failed to set global bot"))
+        .unwrap();
     plugin::on_msg(|msg| on_msg(msg));
 }
 

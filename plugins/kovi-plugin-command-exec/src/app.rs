@@ -1,7 +1,7 @@
 use crate::config::CommandExecConfig;
 use kovi::log::{error, info};
 use kovi::tokio::sync::{broadcast, RwLock};
-use kovi::MsgEvent;
+use kovi::{MsgEvent, RuntimeBot};
 use std::collections::HashSet;
 use std::sync::{Arc, OnceLock};
 
@@ -12,6 +12,7 @@ pub struct BotCommandBuilder {
     common_command: HashSet<&'static str>,
 }
 static COMMAND_BUILDER: OnceLock<RwLock<BotCommandBuilder>> = OnceLock::new();
+pub static GLOBAL_BOT: OnceLock<Arc<RuntimeBot>> = OnceLock::new();
 impl BotCommandBuilder {
     fn instance_lock() -> &'static RwLock<BotCommandBuilder> {
         COMMAND_BUILDER.get_or_init(|| {
@@ -68,11 +69,12 @@ impl BotCommandBuilder {
         });
     }
 }
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct BotCommand {
     pub cmd: Arc<String>,
     pub args: Arc<Vec<String>>,
     pub event: Arc<MsgEvent>,
+    pub bot: Arc<RuntimeBot>,
 }
 impl BotCommand {
     pub fn from_str(s: &str, e: Arc<MsgEvent>) -> BotCommand {
@@ -81,6 +83,7 @@ impl BotCommand {
             event: e,
             cmd: Arc::new(args.next().expect("怎么可能为空捏").to_string()),
             args: Arc::new(args.map(|x| x.to_string()).collect()),
+            bot: GLOBAL_BOT.get().expect("Need GLOBAL_BOT Init").clone(),
         }
     }
     pub async fn invoke_command(&self) {
