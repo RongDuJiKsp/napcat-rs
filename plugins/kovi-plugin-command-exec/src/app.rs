@@ -93,7 +93,7 @@ impl BotCommand {
             return;
         }
         if f.super_command.contains(self.cmd.as_str()) {
-            if CommandExecConfig::get().in_super_user(self.event.as_ref()) {
+            if CommandExecConfig::get().in_super_user(self.event.as_ref(), self.bot.clone()).await {
                 self.exec_command(&f.event_bus).await;
             } else {
                 self.event.reply_and_quote("你是谁喵！我不认识你喵！哒咩！");
