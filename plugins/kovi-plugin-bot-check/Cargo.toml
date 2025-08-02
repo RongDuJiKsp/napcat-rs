@@ -8,3 +8,5 @@ kovi.workspace = true
 kovi-plugin-dev-utils = { path = "../kovi-plugin-dev-utils" }
 serde = { version = "1.0.219", features = ["derive"] }
 anyhow = "1.0.98"
+regex = "1.11.1"
+serde_with = "3.14.0"
