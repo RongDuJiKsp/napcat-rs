@@ -34,9 +34,9 @@ impl InfoEv {
                 event.self_id,
                 false,
             )
-            .await
-            .map_err(|e| anyhow::anyhow!("{}", e.data.to_string()))?
-            .data,
+                .await
+                .map_err(|e| anyhow::anyhow!("{}", e.data.to_string()))?
+                .data,
         )?)
     }
 }

@@ -115,7 +115,7 @@ impl NyaCatMemory {
         while let Some((chat_time, msg)) = arr.pop_front() {
             if arr.len() < ChatConfig::get().model.role_max_message
                 && now_time - chat_time
-                    < ChatConfig::get().model.role_context_expiration_time_second
+                < ChatConfig::get().model.role_context_expiration_time_second
             {
                 arr.push_front((chat_time, msg));
                 break;

@@ -7,6 +7,7 @@ fn main() {
         kovi_plugin_check_alllong,
         chat_message,
         kovi_plugin_emoji_attack,
+        kovi_plugin_bot_check
     )
-    .run();
+        .run();
 }
