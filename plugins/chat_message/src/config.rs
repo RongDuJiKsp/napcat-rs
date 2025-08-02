@@ -1,5 +1,5 @@
 use kovi::RuntimeBot;
-use kovi_plugin_dev_utils::configinit::init_config;
+use kovi_plugin_dev_utils::config::initfn::init_config;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};

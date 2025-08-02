@@ -1,6 +1,6 @@
 use kovi::tokio::sync::RwLock;
 use kovi::RuntimeBot;
-use kovi_plugin_dev_utils::configinit::init_data;
+use kovi_plugin_dev_utils::config::initfn::init_data;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, OnceLock};
