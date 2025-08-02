@@ -36,6 +36,6 @@ impl BanConfig {
 }
 #[derive(Default, Deserialize, Serialize)]
 pub struct InviteBanConfig {
-    pub min_level: Option<i32>,    //当邀请人等级小于这个数时触发ban 默认2147438648
-    pub min_activate: Option<i32>, //当邀请人群活跃等级小于这个数时 默认2147438648
+    pub min_level: Option<i32>,    //当邀请人等级小于这个数时触发ban 
+    pub min_activate: Option<i32>, //当邀请人群活跃等级小于这个数时ban
 }
