@@ -1645,6 +1645,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "kovi-plugin-bot-check"
+version = "0.1.0"
+dependencies = [
+ "kovi",
+]
+
+[[package]]
 name = "kovi-plugin-check-alllong"
 version = "0.1.0"
 source = "git+https://github.com/RongDuJiKsp/check-all-long.git?branch=update-0.12#59999550da3e1111d685584ca5613dcb335553b6"
@@ -2051,6 +2058,7 @@ version = "0.1.0"
 dependencies = [
  "chat_message",
  "kovi",
+ "kovi-plugin-bot-check",
  "kovi-plugin-check-alllong",
  "kovi-plugin-command-exec",
  "kovi-plugin-emoji-attack",
