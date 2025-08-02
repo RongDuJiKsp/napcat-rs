@@ -5,7 +5,7 @@ mod handle;
 use crate::config::BanConfig;
 use crate::data::BanData;
 use kovi::event::GroupMsgEvent;
-use kovi::log::error;
+use kovi::log::{error, info};
 use kovi::{PluginBuilder as plugin, RequestEvent, RuntimeBot};
 use std::sync::Arc;
 
@@ -25,6 +25,7 @@ async fn on_msg(e: Arc<GroupMsgEvent>, bot: Arc<RuntimeBot>) {
     }
 }
 async fn on_request(e: Arc<RequestEvent>, bot: Arc<RuntimeBot>) {
+    info!("接收到群邀请请求：{:?}", e);
     if let Err(error) = handle::on_request(e, bot).await {
         error!("{:?}", error);
     }
