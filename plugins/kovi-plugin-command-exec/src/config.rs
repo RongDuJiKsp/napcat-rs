@@ -1,5 +1,5 @@
-use kovi::{MsgEvent, RuntimeBot};
-use kovi_plugin_dev_utils::config::initfn::init_config;
+use kovi::MsgEvent;
+use kovi_plugin_dev_utils::config;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::OnceLock;
@@ -28,15 +28,4 @@ impl CommandExecConfig {
         self.allow_exec_context.contains(&Self::event_context(ev))
     }
 }
-impl CommandExecConfig {
-    pub fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
-        init_config(
-            runtime_bot,
-            "command_exec_config.json",
-            &COMMAND_EXEC_CONFIG,
-        )
-    }
-    pub fn get() -> &'static CommandExecConfig {
-        COMMAND_EXEC_CONFIG.get().unwrap()
-    }
-}
+config!(CommandExecConfig,COMMAND_EXEC_CONFIG,"command_exec_config.json");

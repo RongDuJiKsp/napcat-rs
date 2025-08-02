@@ -1,12 +1,10 @@
 mod dynconfig;
 
 use kovi::PluginBuilder as plugin;
+use crate::dynconfig::BanDynConfig;
 
 #[kovi::plugin]
 async fn main() {
-    plugin::on_msg(|event| async move {
-        if event.borrow_text() == Some("hi") {
-            event.reply("hi")
-        }
-    });
+    let bot = plugin::get_runtime_bot();
+    BanDynConfig::init(&bot).expect("Failed to initialize BanDynConfig");
 }

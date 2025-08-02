@@ -1648,7 +1648,10 @@ dependencies = [
 name = "kovi-plugin-bot-check"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "kovi",
+ "kovi-plugin-dev-utils",
+ "serde",
 ]
 
 [[package]]

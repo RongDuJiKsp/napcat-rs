@@ -8,5 +8,5 @@ fn main() {
         chat_message,
         kovi_plugin_emoji_attack,
     )
-    .run();
+        .run();
 }

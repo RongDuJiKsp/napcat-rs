@@ -67,9 +67,11 @@ NyaCat Bot 是一个基于 `kovi` 和 `napcat` 的猫娘机器人，支持指令
   // 是否所有用户都是超级用户
 }
 ```
+
 ### `emoji_attack_config.json`
 
 此文件配置自动表情回应的设置
+
 ```json5
 {
   "allow_monkey_groups": [

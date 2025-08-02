@@ -18,7 +18,7 @@ pub fn reply_as_im(ev: Arc<MsgEvent>, reply: &str) {
                     .map(|c| c * reply.len() as u64)
                     .unwrap_or_else(|| ChatConfig::get().model.dot_wait_time_ms),
             ))
-            .await;
+                .await;
             ev.reply(reply);
         }
     });

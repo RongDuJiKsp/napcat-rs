@@ -1,5 +1,4 @@
-use kovi::RuntimeBot;
-use kovi_plugin_dev_utils::config::initfn::init_config;
+use kovi_plugin_dev_utils::config;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -31,14 +30,8 @@ pub struct ChatConfig {
     pub allow_groups: HashSet<i64>,
     pub model: ChatModelCallConfig,
 }
-impl ChatConfig {
-    pub fn init(runtime_bot: &RuntimeBot) -> Result<(), anyhow::Error> {
-        init_config(runtime_bot, "chat_config.json", &CHAT_CONFIG)
-    }
-    pub fn get() -> &'static ChatConfig {
-        CHAT_CONFIG.get().unwrap()
-    }
-}
+config!(ChatConfig,CHAT_CONFIG,"chat_config.json");
+
 pub struct SyncControl;
 static LIVE: AtomicBool = AtomicBool::new(true);
 impl SyncControl {
